@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBookingSystem.Core", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBookingSystem.Infrastructure", "EventBookingSystem.Infrastructure\EventBookingSystem.Infrastructure.csproj", "{565692CF-37BB-41AD-B4D0-FC8AE9D49AD5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{556A622D-E9D8-47EC-9774-F3DF1F7CE2BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
