@@ -7,7 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
+    <PackageReference Include="Microsoft.IdentityModel" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EventBookingSystem.Core\EventBookingSystem.Core.csproj" />
+    <ProjectReference Include="..\EventBookingSystem.Infrastructure\EventBookingSystem.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

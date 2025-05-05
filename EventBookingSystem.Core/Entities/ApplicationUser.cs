@@ -1,23 +1,61 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNetCore.Identity;
 
 namespace EventBookingSystem.Core.Entities
 {
-    public class ApplicationUser : IdentityUser
+    public class ApplicationUser : IdentityUser<Guid>
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public UserRole Role { get; set; }
-        public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
-    }
+        public string FirstName { get; private set; }
+        public string LastName { get; private set; }
+        public DateTime DateOfBirth { get; private set; }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime UpdatedAt { get; private set; }
+        public bool IsEmailVerified { get; private set; }
+        public bool IsPhoneVerified { get; private set; }
+        public Guid StatusId { get; private set; }
 
-    // EventBookingSystem.Core/Entities/UserRole.cs
-    public enum UserRole
-    {
-        User,
-        Admin
+        public ICollection<RefreshToken> refreshTokens { get; private set; } = new List<RefreshToken>();
+        public ICollection<Booking> Bookings { get; private set; } = new List<Booking>();
+
+
+        protected ApplicationUser() { } // عشان ال EFCore
+
+
+        public static ApplicationUser Create(string username,string email, string fName, string lName, DateOnly dateBirhday, Guid statusId)
+        {
+            return new ApplicationUser()
+            {
+                Id = Guid.NewGuid(),
+                Email = email,
+                UserName = username,
+                FirstName = fName,
+                LastName = lName,
+                DateOfBirth = dateBirhday.ToDateTime(TimeOnly.MinValue),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                StatusId = statusId
+            };
+        }
+
+        public void UpdateProfile(string fname, string lname)
+        {
+            FirstName = fname;
+            LastName = lname;
+            UpdatedAt = DateTime.UtcNow;    
+        }
+
+
+        public void VirfyEmail()
+        {
+            IsEmailVerified = true;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void VirfyPhone()
+        {
+            IsPhoneVerified = true;
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

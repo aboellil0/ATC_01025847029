@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace EventBookingSystem.Core.DTOs.Auth
 {
-    internal class LoginDto
+    public class RefreshTokenReq
     {
+        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
     }
 }
