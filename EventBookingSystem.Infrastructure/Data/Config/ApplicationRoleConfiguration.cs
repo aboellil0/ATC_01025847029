@@ -42,10 +42,6 @@ namespace EventBookingSystem.Infrastructure.Data.Config
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc) // Static DateTime
             });
 
-            builder.HasMany(r => r.Users)
-                .WithOne()
-                .HasForeignKey("RoleId")
-                .IsRequired();
         }
 
     }

@@ -37,7 +37,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(o => o.UseSqlServer(builder.
 
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddSingleton<ITokenService, TokenService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 
 builder.Services.AddAuthentication(o =>
