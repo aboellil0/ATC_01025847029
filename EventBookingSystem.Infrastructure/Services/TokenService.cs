@@ -44,10 +44,16 @@ namespace EventBookingSystem.Infrastructure.Services
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(30),
                 signingCredentials: creds);
-            return new JwtSecurityTokenHandler().WriteToken(token);
+
+            var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
+
+            // Store the access token in the global variable
+            GlobalVariables.AccessToken = accessToken;
+
+            return accessToken;
         }
 
-        public async Task<string> GenerateRefreshTokenAsync(Guid userId, string deviceId)
+        public async Task<string> GenerateRefreshTokenAsync(Guid userId)
         {
             var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
             var expiresAt = DateTime.UtcNow.AddDays(30);
@@ -88,6 +94,16 @@ namespace EventBookingSystem.Infrastructure.Services
                 SameSite = SameSiteMode.Strict
             };
             _httpContextAccessor.HttpContext.Response.Cookies.Append("refresh_token", token, cookieOptions);
+            return true;
+        }
+
+        public async Task<bool> RevokeTokenAsync(string token)
+        {
+            var storedToken = await GetStoredRefreshTokenAsync(token);
+            if (storedToken == null)
+                return false;
+            storedToken.Revoke(_httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString());
+            await RemoveStoredRefreshTokenAsync(token);
             return true;
         }
     }

@@ -14,6 +14,5 @@ namespace EventBookingSystem.Core.DTOs.Auth
         public string FirstName { get; set; }
         public string LastName { get; set; } = string.Empty;
         public DateOnly Birthaday { get; set; }
-        public string IpAddress { get; set; }
     }
 }

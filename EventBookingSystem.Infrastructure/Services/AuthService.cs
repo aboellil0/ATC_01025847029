@@ -42,7 +42,7 @@ namespace EventBookingSystem.Infrastructure.Services
                 await _manager.CreateAsync(user, request.Password);
 
 
-                return await GenerateAuthResponseAsync(user, request.IpAddress);
+                return await GenerateAuthResponseAsync(user);
             }
             catch (Exception ex)
             {
@@ -62,7 +62,7 @@ namespace EventBookingSystem.Infrastructure.Services
                 }
 
 
-                return await GenerateAuthResponseAsync(user, request.DeviceId);
+                return await GenerateAuthResponseAsync(user);
             }
             catch (Exception ex)
             {
@@ -91,7 +91,7 @@ namespace EventBookingSystem.Infrastructure.Services
                 }
 
                 var user = await _manager.FindByNameAsync(userId);
-                return await GenerateAuthResponseAsync(user, storedToken.CreatedByIp);
+                return await GenerateAuthResponseAsync(user);
             }
             catch (Exception ex)
             {
@@ -133,16 +133,16 @@ namespace EventBookingSystem.Infrastructure.Services
 
 
 
-        private async Task<AuthResponse> GenerateAuthResponseAsync(ApplicationUser user, string deviceId)
+        private async Task<AuthResponse> GenerateAuthResponseAsync(ApplicationUser user)
         {
-            var accessToken = await _tokenService.GenerateJwtTokenAsync(user);
-            var refreshToken = await _tokenService.GenerateRefreshTokenAsync(user.Id, deviceId);
+            var accessToken = await _tokenService.GenerateAccessTokenAsync(user);
+            var refreshToken = await _tokenService.GenerateRefreshTokenAsync(user.Id);
 
             return new AuthResponse
             {
                 Success = true,
                 Token = accessToken,
-                RefreshToken = refreshToken.Token,
+                RefreshToken = refreshToken,
                 AccessTokenExpiration = DateTime.Now.AddMinutes(
                     _configuration.GetValue<int>("Jwt:AccessTokenExpirationMinutes", 15)),
             };
