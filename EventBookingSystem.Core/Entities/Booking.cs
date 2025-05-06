@@ -8,9 +8,9 @@ namespace EventBookingSystem.Core.Entities
 {
     public class Booking
     {
-        public int Id { get; set; }
-        public string UserId { get; set; }
-        public int EventId { get; set; }
+        public Guid Id { get; set; }
+        public Guid UserId { get; set; }
+        public Guid EventId { get; set; }
         public DateTime BookingDate { get; set; }
 
         // Navigation properties

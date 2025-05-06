@@ -15,6 +15,7 @@ namespace EventBookingSystem.Core.Entities
 
         public ICollection<RefreshToken> refreshTokens { get; private set; } = new List<RefreshToken>();
         public ICollection<Booking> Bookings { get; private set; } = new List<Booking>();
+        public ApplicationRole Role { get; private set; } 
 
 
         protected ApplicationUser() { } // عشان ال EFCore

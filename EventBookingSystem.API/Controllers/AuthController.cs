@@ -54,28 +54,28 @@ namespace BankingSystem.UserService.Api.Controllers
             return Ok(response);
         }
 
-        [HttpPost("refresh")]
-        public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] RefreshTokenReq request)
-        {
-            var response = await _authService.RefreshTokenAsync(request);
-            if (!response.Success)
-            {
-                return Unauthorized(response);
-            }
-            return Ok(response);
-        }
+        //[HttpPost("refresh")]
+        //public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] RefreshTokenReq request)
+        //{
+        //    var response = await _authService.RefreshTokenAsync(request);
+        //    if (!response.Success)
+        //    {
+        //        return Unauthorized(response);
+        //    }
+        //    return Ok(response);
+        //}
 
-        [Authorize]
-        [HttpPost("revoke")]
-        public async Task<IActionResult> RevokeToken([FromBody] string token)
-        {
-            var success = await _TokenService.RevokeTokenAsync(token);
-            if (!success)
-            {
-                return BadRequest("Token revocation failed");
-            }
-            return Ok();
-        }
+        //[Authorize]
+        //[HttpPost("revoke")]
+        //public async Task<IActionResult> RevokeToken([FromBody] string token)
+        //{
+        //    var success = await _TokenService.RevokeTokenAsync(token);
+        //    if (!success)
+        //    {
+        //        return BadRequest("Token revocation failed");
+        //    }
+        //    return Ok();
+        //}
 
         [Authorize]
         [HttpPost("logout")]
