@@ -38,7 +38,7 @@ namespace EventBookingSystem.Infrastructure.Services
                     return new AuthResponse { Error = "User Is already regiterd with same username", Message = request.UserName, Success = false };
                 }
 
-                var user = ApplicationUser.Create(request.UserName, request.Email, request.FirstName, request.LastName, request.Birthaday, UserStatus.SystemStatusIds.Active);
+                var user = ApplicationUser.Create(request.UserName, request.Email, request.FirstName, request.LastName, request.Birthaday);
                 await _manager.CreateAsync(user, request.Password);
 
 

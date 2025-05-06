@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNet.Identity.EntityFramework;
+﻿
 using Microsoft.AspNetCore.Identity;
 
 namespace EventBookingSystem.Core.Entities
@@ -12,7 +12,6 @@ namespace EventBookingSystem.Core.Entities
         public DateTime UpdatedAt { get; private set; }
         public bool IsEmailVerified { get; private set; }
         public bool IsPhoneVerified { get; private set; }
-        public Guid StatusId { get; private set; }
 
         public ICollection<RefreshToken> refreshTokens { get; private set; } = new List<RefreshToken>();
         public ICollection<Booking> Bookings { get; private set; } = new List<Booking>();
@@ -21,7 +20,7 @@ namespace EventBookingSystem.Core.Entities
         protected ApplicationUser() { } // عشان ال EFCore
 
 
-        public static ApplicationUser Create(string username,string email, string fName, string lName, DateOnly dateBirhday, Guid statusId)
+        public static ApplicationUser Create(string username,string email, string fName, string lName, DateOnly dateBirhday)
         {
             return new ApplicationUser()
             {
@@ -33,8 +32,7 @@ namespace EventBookingSystem.Core.Entities
                 DateOfBirth = dateBirhday.ToDateTime(TimeOnly.MinValue),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                StatusId = statusId
+                SecurityStamp = Guid.NewGuid().ToString()
             };
         }
 

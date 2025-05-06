@@ -9,10 +9,11 @@ namespace EventBookingSystem.Core.Interfaces.Services
 {
     public interface ITokenService
     {
-        public Task<string> GenerateJwtTokenAsync(ApplicationUser user);
-        public Task<RefreshToken> GenerateRefreshTokenAsync(Guid userId, string deviceId);
+        public Task<string> GenerateAccessTokenAsync(ApplicationUser user);
+        public Task<string> GenerateRefreshTokenAsync(Guid userId, string deviceId);
         public Task<RefreshToken> GetStoredRefreshTokenAsync(string token);
         public Task StoreRefreshTokenAsync(RefreshToken token);
         public Task<bool> RevokeTokenAsync(string token);
+        public Task<bool> RemoveStoredRefreshTokenAsync(string token);
     }
 }

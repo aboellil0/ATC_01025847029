@@ -1,6 +1,6 @@
-@EventBookingSystem.API_HostAddress = http://localhost:5208
+@EventBookingSystem.Api_HostAddress = http://localhost:5076
 
-GET {{EventBookingSystem.API_HostAddress}}/weatherforecast/
+GET {{EventBookingSystem.Api_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###

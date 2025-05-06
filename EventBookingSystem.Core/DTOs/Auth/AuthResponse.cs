@@ -14,6 +14,5 @@ namespace EventBookingSystem.Core.DTOs.Auth
         public string Token { get; set; }
         public DateTime AccessTokenExpiration { get; set; }
         public string RefreshToken { get; set; }
-        public MultiFactorToken MFToken { get; set; }
     }
 }
