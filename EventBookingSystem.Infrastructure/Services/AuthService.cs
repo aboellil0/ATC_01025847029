@@ -71,32 +71,51 @@ namespace EventBookingSystem.Infrastructure.Services
             }
         }
 
+        public async Task<AuthResponse> LogoutAsync(Guid userId, string Rtoken)
+        {
+            try
+            {
+                var user = await _manager.FindByIdAsync(userId.ToString());
+                if (user == null)
+                {
+                    return new AuthResponse { Success = false, Error = "User not found" };
+                }
+                await _tokenService.RemoveRefreshTokenAsync(Rtoken, userId);
+                return new AuthResponse { Success = true, Message = "Logout successful" };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Logout failed for user {UserId}", userId);
+                return new AuthResponse { Success = false, Error = string.Join(", ", ex), Message = "Logout failed for user {UserId}" };
+            }
+        }
+
         public async Task<AuthResponse> RefreshTokenAsync(RefreshTokenReq request)
         {
             try
             {
                 var principal = GetPrincipalFromExpiredToken(request.AccessToken);
-                if (principal == null)
-                {
-                    return new AuthResponse { Success = false, Error = "Invalid access token" };
-                }
-
                 var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var storedToken = await _tokenService.GetStoredRefreshTokenAsync(request.RefreshToken);
-
-                if (storedToken == null || storedToken.UserId != Guid.Parse(userId) ||
-                    !storedToken.IsActive || DateTime.UtcNow >= storedToken.ExpireDate)
+                if (request.AccessToken == null)
+                {
+                    return new AuthResponse { Success = false, Error = "Invalid token" };
+                }
+                var user = await _manager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return new AuthResponse { Success = false, Error = "User not found" };
+                }
+                var isValid = await _tokenService.ValidateRefreshTokenAsync(Guid.Parse(userId), request.RefreshToken);
+                if (isValid)
                 {
                     return new AuthResponse { Success = false, Error = "Invalid refresh token" };
                 }
-
-                var user = await _manager.FindByNameAsync(userId);
                 return await GenerateAuthResponseAsync(user);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Token refresh failed");
-                return new AuthResponse { Success = false, Error = "Token refresh failed" };
+                _logger.LogError(ex, "Refresh token failed for user {UserId}", request.AccessToken);
+                return new AuthResponse { Success = false, Error = string.Join(", ", ex), Message = "Refresh token failed for user {UserId}" };
             }
         }
 

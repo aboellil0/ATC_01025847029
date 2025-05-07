@@ -1,5 +1,6 @@
 ﻿
 using EventBookingSystem.Core.DTOs.Auth;
+using EventBookingSystem.Core.Entities;
 using EventBookingSystem.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BankingSystem.UserService.Api.Controllers
 {
@@ -18,7 +20,7 @@ namespace BankingSystem.UserService.Api.Controllers
         private readonly ILogger<AuthController> _logger;
         private readonly ITokenService _TokenService;
 
-        public AuthController(IAuthService authService,ITokenService tokenService, ILogger<AuthController> logger)
+        public AuthController(IAuthService authService, ITokenService tokenService, ILogger<AuthController> logger)
         {
             _authService = authService;
             _TokenService = tokenService;
@@ -27,7 +29,7 @@ namespace BankingSystem.UserService.Api.Controllers
 
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterAsync([FromBody] RegisterReq model)
+        public async Task<ActionResult<AuthResponse>> RegisterAsync([FromBody] RegisterReq model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -81,20 +83,12 @@ namespace BankingSystem.UserService.Api.Controllers
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
-            try
-            {
-                var token = HttpContext.GetTokenAsync("access_token").Result;
-                await _TokenService.RevokeTokenAsync(token);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during logout");
-                return StatusCode(500, "An error occurred during logout");
-            }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // Get REfresh token from cookies 
+            var RefreshToken = Request.Cookies["refreshToken"];
+            var success = await _authService.LogoutAsync(Guid.Parse(userId), RefreshToken);
+            return Ok(success);
+
         }
-
-
-
     }
 }

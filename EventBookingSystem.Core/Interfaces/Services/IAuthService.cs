@@ -12,5 +12,6 @@ namespace EventBookingSystem.Core.Interfaces.Services
         public Task<AuthResponse> RegisterAsync(RegisterReq request);
         public Task<AuthResponse> LoginAsync(LoginReq request);
         public Task<AuthResponse> RefreshTokenAsync(RefreshTokenReq request);
+        public Task<AuthResponse> LogoutAsync(Guid userId, string Rtoken);
     }
 }

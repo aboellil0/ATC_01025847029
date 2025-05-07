@@ -1,5 +1,6 @@
 ﻿using EventBookingSystem.Core.Entities;
 using EventBookingSystem.Core.Interfaces.Services;
+using EventBookingSystem.Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -20,9 +21,12 @@ namespace EventBookingSystem.Infrastructure.Services
         private readonly ILogger<TokenService> _logger;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ApplicationDbContext _dbContext;
 
-        public TokenService(UserManager<ApplicationUser> manager, ILogger<TokenService> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+
+        public TokenService(ApplicationDbContext dbContext, UserManager<ApplicationUser> manager, ILogger<TokenService> logger, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
+            _dbContext = dbContext;
             this._manager = manager;
             this._logger = logger;
             this._configuration = configuration;
@@ -30,24 +34,38 @@ namespace EventBookingSystem.Infrastructure.Services
         }
         public async Task<string> GenerateAccessTokenAsync(ApplicationUser user)
         {
-            var claims = new List<Claim>
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"]));
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var userClaims = await _manager.GetClaimsAsync(user);
+            var roles = await _manager.GetRolesAsync(user);
+            var roleClaims = new List<Claim>();
+
+            foreach (var role in roles)
+                roleClaims.Add(new Claim("roles", role));
+
+            var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-            };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            }
+            .Union(userClaims)
+            .Union(roleClaims);
+
+
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(30),
-                signingCredentials: creds);
+                expires: DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("Jwt:AccessTokenExpirationMinutes", 15)),
+                signingCredentials: credentials
+            );
 
-            var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
-
-            // Store the access token in the global variable
+            var accessToken = tokenHandler.WriteToken(token);
+            // Store the access Rtoken in the global variable
             GlobalVariables.AccessToken = accessToken;
 
             return accessToken;
@@ -61,31 +79,45 @@ namespace EventBookingSystem.Infrastructure.Services
             await StoreRefreshTokenAsync(refreshToken);
             return token;
         }
-        public async Task StoreRefreshTokenAsync(RefreshToken token)
+        public async Task StoreRefreshTokenAsync(RefreshToken Rtoken)
         {
             var cookieOptions = new Microsoft.AspNetCore.Http.CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
-                Expires = token.ExpireDate,
+                Expires = Rtoken.ExpireDate,
                 SameSite = SameSiteMode.Strict
             };
 
-            _httpContextAccessor.HttpContext.Response.Cookies.Append("refresh_token", token.Token, cookieOptions);
+            // Store the refresh Rtoken in the database
+            _dbContext.RefreshTokens.Add(Rtoken);
+            await _dbContext.SaveChangesAsync();
+
+            _httpContextAccessor.HttpContext.Response.Cookies.Append("refresh_token", Rtoken.Token, cookieOptions);
         }
 
-        public async Task<RefreshToken> GetStoredRefreshTokenAsync(string token)
+        public async Task<bool> ValidateRefreshTokenAsync(Guid userId,string refreshToken)
         {
-            var storedToken = _httpContextAccessor.HttpContext.Request.Cookies["refresh_token"];
-            if (storedToken == null || storedToken != token)
-                return null;
-
-            // Assuming you have a way to retrieve the RefreshToken object from the token string  
-            return RefreshToken.Create(Guid.NewGuid(), token, DateTime.UtcNow.AddDays(30), _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString());
+            var storedToken = _dbContext.RefreshTokens
+                .FirstOrDefault(x => x.UserId == userId && x.Token == refreshToken && x.IsActive == true && x.ExpireDate>DateTime.UtcNow);
+            if (storedToken == null)
+            {
+                _logger.LogWarning("Invalid refresh Rtoken");
+                return false;
+            }
+            return true;
         }
 
-        public async Task<bool> RemoveStoredRefreshTokenAsync(string token)
+
+        public async Task<bool> RemoveRefreshTokenAsync(string Rtoken,Guid userId)
         {
+            var isValid = ValidateRefreshTokenAsync(userId, Rtoken);
+            if (!isValid.Result)
+            {
+                _logger.LogWarning("Invalid refresh Rtoken");
+                return false;
+            }
+            // remove refrsh token from cookies
             var cookieOptions = new Microsoft.AspNetCore.Http.CookieOptions
             {
                 HttpOnly = true,
@@ -93,17 +125,10 @@ namespace EventBookingSystem.Infrastructure.Services
                 Expires = DateTime.UtcNow.AddDays(-1),
                 SameSite = SameSiteMode.Strict
             };
-            _httpContextAccessor.HttpContext.Response.Cookies.Append("refresh_token", token, cookieOptions);
-            return true;
-        }
-
-        public async Task<bool> RevokeTokenAsync(string token)
-        {
-            var storedToken = await GetStoredRefreshTokenAsync(token);
-            if (storedToken == null)
-                return false;
-            storedToken.Revoke(_httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString());
-            await RemoveStoredRefreshTokenAsync(token);
+            _httpContextAccessor.HttpContext.Response.Cookies.Append("refresh_token", "", cookieOptions);
+            // revoke refresh token
+            var token = _dbContext.RefreshTokens.FirstOrDefault(x => x.UserId == userId && x.Token == Rtoken);
+            token.Revoke(_httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString()); 
             return true;
         }
     }

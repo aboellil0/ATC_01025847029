@@ -11,9 +11,8 @@ namespace EventBookingSystem.Core.Interfaces.Services
     {
         public Task<string> GenerateAccessTokenAsync(ApplicationUser user);
         public Task<string> GenerateRefreshTokenAsync(Guid userId);
-        public Task<RefreshToken> GetStoredRefreshTokenAsync(string token);
+        public Task<bool> ValidateRefreshTokenAsync(Guid userId, string refreshToken);
         public Task StoreRefreshTokenAsync(RefreshToken token);
-        public Task<bool> RevokeTokenAsync(string token);
-        public Task<bool> RemoveStoredRefreshTokenAsync(string token);
+        public Task<bool> RemoveRefreshTokenAsync(string token, Guid userId);
     }
 }
