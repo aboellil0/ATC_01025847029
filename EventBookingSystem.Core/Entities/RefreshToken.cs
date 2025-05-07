@@ -12,7 +12,7 @@ namespace EventBookingSystem.Core.Entities
         public Guid UserId { get; private set; }
         public string Token { get; private set; }
         public string CreatedByIp { get; private set; }
-        public string RevokedByIp { get; private set; }
+        public string? RevokedByIp { get; private set; }
         public string? ReblacedToken { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? RevokedAt { get; private set; }

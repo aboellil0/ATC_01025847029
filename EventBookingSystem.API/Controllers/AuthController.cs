@@ -85,7 +85,7 @@ namespace BankingSystem.UserService.Api.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             // Get REfresh token from cookies 
-            var RefreshToken = Request.Cookies["refreshToken"];
+            var RefreshToken = Request.Cookies["refresh_token"];
             var success = await _authService.LogoutAsync(Guid.Parse(userId), RefreshToken);
             return Ok(success);
 

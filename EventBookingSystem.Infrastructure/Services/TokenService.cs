@@ -99,7 +99,7 @@ namespace EventBookingSystem.Infrastructure.Services
         public async Task<bool> ValidateRefreshTokenAsync(Guid userId,string refreshToken)
         {
             var storedToken = _dbContext.RefreshTokens
-                .FirstOrDefault(x => x.UserId == userId && x.Token == refreshToken && x.IsActive == true && x.ExpireDate>DateTime.UtcNow);
+                .FirstOrDefault(x => x.UserId == userId && x.Token == refreshToken && x.ExpireDate>DateTime.UtcNow);
             if (storedToken == null)
             {
                 _logger.LogWarning("Invalid refresh Rtoken");
