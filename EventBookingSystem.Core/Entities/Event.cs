@@ -15,7 +15,18 @@ namespace EventBookingSystem.Core.Entities
         public string Venue { get; set; }
         public decimal Price { get; set; }
         public string ImageUrl { get; set; }
-        public string Category { get; set; }
+        public EventCategory Category { get; set; }
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+    }
+
+    public enum EventCategory
+    {
+        Conference = 0,
+        Workshop = 1,
+        Seminar = 2,
+        Concert = 3,
+        Exhibition = 4,
+        Sports = 5,
+        Other = 6
     }
 }

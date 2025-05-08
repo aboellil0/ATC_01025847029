@@ -56,16 +56,17 @@ namespace BankingSystem.UserService.Api.Controllers
             return Ok(response);
         }
 
-        //[HttpPost("refresh")]
-        //public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] RefreshTokenReq request)
-        //{
-        //    var response = await _authService.RefreshTokenAsync(request);
-        //    if (!response.Success)
-        //    {
-        //        return Unauthorized(response);
-        //    }
-        //    return Ok(response);
-        //}
+        [Authorize]
+        [HttpPost("refresh")]
+        public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] RefreshTokenReq request)
+        {
+            var response = await _authService.RefreshTokenAsync(request);
+            if (!response.Success)
+            {
+                return Unauthorized(response);
+            }
+            return Ok(response);
+        }
 
         //[Authorize]
         //[HttpPost("revoke")]
