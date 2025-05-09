@@ -8,6 +8,6 @@ namespace EventBookingSystem.Core.DTOs.Bookings
 {
     public class BookingCreateDto
     {
-        public int EventId { get; set; }
+        public Guid EventId { get; set; }
     }
 }

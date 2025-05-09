@@ -9,8 +9,8 @@ namespace EventBookingSystem.Core.Interfaces.Services
 {
     public interface IBookingService
     {
-        Task<BookingDto> CreateBookingAsync(int userId, BookingCreateDto bookingCreateDto);
-        Task<IReadOnlyList<BookingDto>> GetUserBookingsAsync(int userId);
-        Task<bool> HasUserBookedEventAsync(int userId, int eventId);
+        Task<BookingDto> CreateBookingAsync(Guid userId, BookingCreateDto bookingCreateDto);
+        Task<IReadOnlyList<BookingDto>> GetUserBookingsAsync(Guid userId);
+        Task<bool> HasUserBookedEventAsync(Guid userId, Guid eventId);
     }
 }

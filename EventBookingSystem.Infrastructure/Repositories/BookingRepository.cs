@@ -32,5 +32,12 @@ namespace EventBookingSystem.Infrastructure.Repositories
             return await _context.Bookings
                 .AnyAsync(b => b.UserId == userId && b.EventId == eventId);
         }
+
+        public async Task<Booking> CreateBookingAsync(Booking booking)
+        {
+            await _context.Bookings.AddAsync(booking);
+            await _context.SaveChangesAsync();
+            return booking;
+        }
     }
 }

@@ -12,6 +12,7 @@ namespace EventBookingSystem.Core.Interfaces.Repositories
         Task<ApplicationUser> GetUserByEmailAsync(string email);
         Task<bool> CheckEmailExistsAsync(string email);
         Task<bool> CheckUsernameExistsAsync(string username);
+        Task<ApplicationUser> GetUserByIdAsync(Guid userId);
         Task AddUserAsync(ApplicationUser user);
         Task UpdateUserAsync(ApplicationUser user);
         Task DeleteUserAsync(ApplicationUser user);

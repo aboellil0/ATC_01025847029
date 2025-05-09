@@ -8,8 +8,8 @@ namespace EventBookingSystem.Core.DTOs.Bookings
 {
     public class BookingDto
     {
-        public int Id { get; set; }
-        public int EventId { get; set; }
+        public Guid Id { get; set; }
+        public Guid EventId { get; set; }
         public string EventName { get; set; }
         public DateTime EventDate { get; set; }
         public string Venue { get; set; }
