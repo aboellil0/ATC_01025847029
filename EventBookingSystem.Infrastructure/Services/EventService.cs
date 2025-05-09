@@ -79,6 +79,7 @@ namespace EventBookingSystem.Infrastructure.Services
         {
             var eventModel = _mapper.Map<Event>(eventCreateDto);
             var createdEvent = await _eventRepository.CreateEventAsync(eventModel);
+            _logger.LogInformation($"event has been created");
             return _mapper.Map<EventDto>(createdEvent);   
         }
         public async Task<EventDto> UpdateEventAsync(Guid id, EventUpdateDto eventUpdateDto)
@@ -92,6 +93,8 @@ namespace EventBookingSystem.Infrastructure.Services
 
             _mapper.Map(eventModel, eventUpdateDto);
             var updatedEvent = await _eventRepository.UpdateEventAsync(eventModel);
+
+            _logger.LogInformation($"Event with id {id} has been updated");
             return _mapper.Map<EventDto>(updatedEvent);
 
         }
@@ -103,6 +106,8 @@ namespace EventBookingSystem.Infrastructure.Services
                 _logger.LogError($"Event with id {id} not found");
                 throw new Exception($"Event By id {id} not found");
             }
+
+            _logger.LogInformation($"Deleted {id}");
             await _eventRepository.DeleteEventAsync(eventModel);
 
         }
