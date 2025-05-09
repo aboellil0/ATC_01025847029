@@ -11,6 +11,11 @@ namespace EventBookingSystem.Core.Interfaces.Repositories
     {
         Task<IReadOnlyList<Event>> GetEventsByCategoryAsync(EventCategory category);
         Task<bool> IsEventBookedByUserAsync(Guid eventId, Guid userId);
+        Task<IReadOnlyList<Event>> ListAllAsync();
+        Task<Event> GetEventByIdAsync(Guid id);
+        Task<Event> CreateEventAsync(Event eventM);
+        Task<Event> UpdateEventAsync(Event eventM);
+        Task DeleteEventAsync(Event EventToRemove);
     }
 
 }

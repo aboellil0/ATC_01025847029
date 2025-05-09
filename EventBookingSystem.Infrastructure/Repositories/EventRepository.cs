@@ -31,5 +31,35 @@ namespace EventBookingSystem.Infrastructure.Repositories
             return await _context.Bookings
                 .AnyAsync(b => b.Id == eventId && b.UserId == userId);
         }
+
+        public async Task<IReadOnlyList<Event>> ListAllAsync()
+        {
+            return await _context.Events.OrderBy(e => e.EventDate).ToListAsync();
+        }
+
+        public async Task<Event> GetEventByIdAsync(Guid id)
+        {
+            return await _context.Events.FirstOrDefaultAsync(e => e.Id == id);
+        }
+
+        public async Task<Event> CreateEventAsync(Event eventM)
+        {
+            var EventCreated = await _context.Events.AddAsync(eventM);
+            await _context.SaveChangesAsync();
+            return eventM;
+        }
+
+        public async Task<Event> UpdateEventAsync(Event eventM)
+        {
+            var EventUpdated = _context.Events.Update(eventM);
+            await _context.SaveChangesAsync();
+            return eventM;
+        }
+
+        public async Task DeleteEventAsync(Event EventToRemove)
+        {
+            _context.Events.Remove(EventToRemove);
+            await _context.SaveChangesAsync();
+        }
     }
 }

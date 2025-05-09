@@ -9,7 +9,7 @@ namespace EventBookingSystem.Core.DTOs.Events
 {
     public class EventDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public EventCategory Category { get; set; }
