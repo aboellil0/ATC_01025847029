@@ -51,5 +51,10 @@ namespace EventBookingSystem.Infrastructure.Repositories
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<ApplicationUser> GetUserByIdAsync(Guid userId)
+        {
+            return await _context.Users.FirstOrDefaultAsync(e=>e.Id==userId);
+        }
     }
 }

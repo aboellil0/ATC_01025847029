@@ -19,8 +19,8 @@ namespace EventBookingSystem.Infrastructure.Services
         private readonly IEventRepository _eventRepository;
         private readonly IMapper _mapper;
         private readonly IBookingRepository _bookingRepository;
-        private readonly ILogger _logger;
-        public EventService(IEventRepository eventRepository, IMapper mapper, IBookingRepository bookingRepository, ILogger logger)
+        private readonly ILogger<EventService> _logger;
+        public EventService(IEventRepository eventRepository, IMapper mapper, IBookingRepository bookingRepository, ILogger<EventService> logger)
         {
             _eventRepository = eventRepository;
             _mapper = mapper;
@@ -77,10 +77,32 @@ namespace EventBookingSystem.Infrastructure.Services
         }
         public async Task<EventDto> CreateEventAsync(CreateEventDto eventCreateDto)
         {
-            var eventModel = _mapper.Map<Event>(eventCreateDto);
+            var eventModel = new Event()
+            {
+                Name=eventCreateDto.Name,
+                Description = eventCreateDto.Description,
+                EventDate = eventCreateDto.EventDate,
+                Venue = eventCreateDto.Venue,
+                Price = eventCreateDto.Price,
+                ImageUrl = eventCreateDto.ImageUrl,
+                Category = (EventCategory)eventCreateDto.Category
+            };
             var createdEvent = await _eventRepository.CreateEventAsync(eventModel);
             _logger.LogInformation($"event has been created");
-            return _mapper.Map<EventDto>(createdEvent);   
+            return new EventDto()
+            {
+                Id=createdEvent.Id,
+                Name = createdEvent.Name,
+                Description = createdEvent.Description,
+                EventDate = createdEvent.EventDate,
+                Venue = createdEvent.Venue,
+                Price = createdEvent.Price,
+                ImageUrl = createdEvent.ImageUrl,
+                Category = createdEvent.Category,
+                CategoryName = Enum.GetName(typeof(EventCategory), createdEvent.Category),
+                FormattedEventDate = createdEvent.EventDate.ToString("dd/MM/yyyy"),
+                IsBooked = false // Default value, will be updated when fetching the event
+            };   
         }
         public async Task<EventDto> UpdateEventAsync(Guid id, EventUpdateDto eventUpdateDto)
         {

@@ -3,6 +3,7 @@ using EventBookingSystem.Core.Entities;
 using EventBookingSystem.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -34,7 +35,7 @@ namespace EventBookingSystem.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -53,11 +54,11 @@ namespace EventBookingSystem.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
 
-        [HttpPost, Authorize(Roles = "ADMIN")]
+        [HttpPost]
         public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto eventCreateDto)
         {
             try
@@ -67,15 +68,15 @@ namespace EventBookingSystem.API.Controllers
                     return BadRequest(ModelState);
                 }
                 var createdEvent = await _eventService.CreateEventAsync(eventCreateDto);
-                return CreatedAtAction(nameof(GetEventById), new { id = createdEvent.Id }, createdEvent);
+                return Ok(createdEvent);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return BadRequest(ex.Message);
             }
         }
 
-        [HttpPut("{id}"), Authorize(Roles = "ADMIN")]
+        [HttpPut("{id}"), Authorize]
         public async Task<IActionResult> UpdateEvent(Guid id, [FromBody] EventUpdateDto eventUpdateDto)
         {
             try
@@ -94,11 +95,11 @@ namespace EventBookingSystem.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
 
-        [HttpDelete("{id}"), Authorize(Roles = "ADMIN")]
+        [HttpDelete("{id}"), Authorize]
         public async Task<IActionResult> DeleteEvent(Guid id)
         {
             try
@@ -112,7 +113,7 @@ namespace EventBookingSystem.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -131,7 +132,7 @@ namespace EventBookingSystem.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
     }

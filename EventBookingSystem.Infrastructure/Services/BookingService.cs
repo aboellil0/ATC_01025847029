@@ -17,9 +17,9 @@ namespace EventBookingSystem.Infrastructure.Services
         private readonly IBookingRepository _bookingRepository;
         private readonly IEventRepository _eventRepository;
         private readonly IUserRepository _userRepository;
-        private readonly ILogger _logger;
+        private readonly ILogger<BookingService> _logger;
         private readonly IMapper _mapper;
-        public BookingService(IBookingRepository bookingRepository, IEventRepository eventRepository, IUserRepository userRepository, ILogger logger, IMapper mapper = null)
+        public BookingService(IBookingRepository bookingRepository, IEventRepository eventRepository, IUserRepository userRepository, ILogger<BookingService> logger, IMapper mapper = null)
         {
             _bookingRepository = bookingRepository;
             _eventRepository = eventRepository;
