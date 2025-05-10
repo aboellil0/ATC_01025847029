@@ -98,7 +98,7 @@ namespace EventBookingSystem.Infrastructure.Services
             return _mapper.Map<EventDto>(updatedEvent);
 
         }
-        public async Task DeleteEventAsync(Guid id)
+        public async Task<bool> DeleteEventAsync(Guid id)
         {
             var eventModel = await _eventRepository.GetEventByIdAsync(id);
             if (eventModel == null)
@@ -108,7 +108,7 @@ namespace EventBookingSystem.Infrastructure.Services
             }
 
             _logger.LogInformation($"Deleted {id}");
-            await _eventRepository.DeleteEventAsync(eventModel);
+            return await _eventRepository.DeleteEventAsync(eventModel);
 
         }
     }

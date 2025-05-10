@@ -15,6 +15,6 @@ namespace EventBookingSystem.Core.Interfaces.Services
         Task<IReadOnlyList<EventDto>> GetEventsByCategoryAsync(EventCategory category, Guid? userId = null);
         Task<EventDto> CreateEventAsync(CreateEventDto eventCreateDto);
         Task<EventDto> UpdateEventAsync(Guid id, EventUpdateDto eventUpdateDto);
-        Task DeleteEventAsync(Guid id);
+        Task<bool> DeleteEventAsync(Guid id);
     }
 }

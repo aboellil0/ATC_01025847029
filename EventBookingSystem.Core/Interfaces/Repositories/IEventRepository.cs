@@ -15,7 +15,7 @@ namespace EventBookingSystem.Core.Interfaces.Repositories
         Task<Event> GetEventByIdAsync(Guid id);
         Task<Event> CreateEventAsync(Event eventM);
         Task<Event> UpdateEventAsync(Event eventM);
-        Task DeleteEventAsync(Event EventToRemove);
+        Task<bool> DeleteEventAsync(Event EventToRemove);
     }
 
 }

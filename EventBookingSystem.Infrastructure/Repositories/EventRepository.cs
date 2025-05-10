@@ -56,10 +56,11 @@ namespace EventBookingSystem.Infrastructure.Repositories
             return eventM;
         }
 
-        public async Task DeleteEventAsync(Event EventToRemove)
+        public async Task<bool> DeleteEventAsync(Event EventToRemove)
         {
-            _context.Events.Remove(EventToRemove);
+            var EventDeleted = _context.Events.Remove(EventToRemove);
             await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
