@@ -15,6 +15,7 @@ namespace EventBookingSystem.Core.Entities
         public string Venue { get; set; }
         public decimal Price { get; set; }
         public string ImageUrl { get; set; }
+        public bool IsBooked { get; set; }
         public EventCategory Category { get; set; }
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     }

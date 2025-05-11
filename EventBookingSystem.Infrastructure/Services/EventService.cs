@@ -17,20 +17,32 @@ namespace EventBookingSystem.Infrastructure.Services
     public class EventService : IEventService
     {
         private readonly IEventRepository _eventRepository;
-        private readonly IMapper _mapper;
         private readonly IBookingRepository _bookingRepository;
         private readonly ILogger<EventService> _logger;
         public EventService(IEventRepository eventRepository, IMapper mapper, IBookingRepository bookingRepository, ILogger<EventService> logger)
         {
             _eventRepository = eventRepository;
-            _mapper = mapper;
             _bookingRepository = bookingRepository;
             _logger = logger;
         }
         public async Task<IReadOnlyList<EventDto>> GetEventsAsync(Guid? userId = null)
         {
             var events = await _eventRepository.ListAllAsync();
-            var eventDtos = _mapper.Map<IReadOnlyList<EventDto>>(events);
+            //var eventDtos = _mapper.Map<IReadOnlyList<EventDto>>(events);
+            var eventDtos = events.Select(e => new EventDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+                Description = e.Description,
+                EventDate = e.EventDate,
+                Venue = e.Venue,
+                Price = e.Price,
+                ImageUrl = e.ImageUrl,
+                Category = e.Category,
+                CategoryName = Enum.GetName(typeof(EventCategory), e.Category),
+                FormattedEventDate = e.EventDate.ToString("dd/MM/yyyy"),
+                IsBooked = e.IsBooked
+            }).ToList();
 
             if (userId != null) {
                 foreach (var eventDto in eventDtos)
@@ -51,7 +63,21 @@ namespace EventBookingSystem.Infrastructure.Services
                 throw new Exception($"Event By id {id} not found");
             }
 
-            var eventDto = _mapper.Map<EventDto>(eventModel);
+            //var eventDto = _mapper.Map<EventDto>(eventModel);
+            var eventDto = new EventDto()
+            {
+                Id = id,
+                Name = eventModel.Name,
+                Description = eventModel.Description,
+                EventDate = eventModel.EventDate,
+                Venue = eventModel.Venue,
+                Price = eventModel.Price,
+                ImageUrl = eventModel.ImageUrl,
+                Category = eventModel.Category,
+                CategoryName = Enum.GetName(typeof(EventCategory), eventModel.Category),
+                FormattedEventDate = eventModel.EventDate.ToString("dd/MM/yyyy"),
+                IsBooked = eventModel.IsBooked 
+            };
             if (userId != null)
             {
                 var isBooked = await _bookingRepository.HasUserBookedEventAsync(userId.Value, eventModel.Id);
@@ -63,7 +89,22 @@ namespace EventBookingSystem.Infrastructure.Services
         public async Task<IReadOnlyList<EventDto>> GetEventsByCategoryAsync(EventCategory category, Guid? userId = null)
         {
             var events = await _eventRepository.GetEventsByCategoryAsync(category);
-            var eventDtos = _mapper.Map<IReadOnlyList<EventDto>>(events);
+            //var eventDtos = _mapper.Map<IReadOnlyList<EventDto>>(events);
+            var eventDtos = events.Select(e => new EventDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+                Description = e.Description,
+                EventDate = e.EventDate,
+                Venue = e.Venue,
+                Price = e.Price,
+                ImageUrl = e.ImageUrl,
+                Category = e.Category,
+                CategoryName = Enum.GetName(typeof(EventCategory), e.Category),
+                FormattedEventDate = e.EventDate.ToString("dd/MM/yyyy"),
+                IsBooked = e.IsBooked
+            }).ToList();
+
             if (userId != null)
             {
                 foreach (var eventDto in eventDtos)
@@ -113,12 +154,33 @@ namespace EventBookingSystem.Infrastructure.Services
                 throw new Exception($"Event By id {id} not found");
             }
 
-            _mapper.Map(eventModel, eventUpdateDto);
+            //_mapper.Map(eventModel, eventUpdateDto);
+            eventModel.Name = eventUpdateDto.Name;
+            eventModel.Description = eventUpdateDto.Description;
+            eventModel.EventDate = eventUpdateDto.EventDate;
+            eventModel.Venue = eventUpdateDto.Venue;
+            eventModel.Price = eventUpdateDto.Price;
+            eventModel.ImageUrl = eventUpdateDto.ImageUrl;
+            eventModel.Category = (EventCategory)eventUpdateDto.Category;
+
             var updatedEvent = await _eventRepository.UpdateEventAsync(eventModel);
 
             _logger.LogInformation($"Event with id {id} has been updated");
-            return _mapper.Map<EventDto>(updatedEvent);
-
+            //return _mapper.Map<EventDto>(updatedEvent);
+            return new EventDto()
+            {
+                Id = id,
+                Name = updatedEvent.Name,
+                Description = updatedEvent.Description,
+                EventDate = updatedEvent.EventDate,
+                Venue = updatedEvent.Venue,
+                Price = updatedEvent.Price,
+                ImageUrl = updatedEvent.ImageUrl,
+                Category = updatedEvent.Category,
+                CategoryName = Enum.GetName(typeof(EventCategory), updatedEvent.Category),
+                FormattedEventDate = updatedEvent.EventDate.ToString("dd/MM/yyyy"),
+                IsBooked = updatedEvent.IsBooked // Default value, will be updated when fetching the event
+            };
         }
         public async Task<bool> DeleteEventAsync(Guid id)
         {
