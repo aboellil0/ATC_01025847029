@@ -1,0 +1,32 @@
+﻿@namespace EventBookingSystem.Web.Components
+@inject IJSRuntime JSRuntime
+
+<div class="mt-16 grid md:grid-cols-2 gap-12 items-center">
+    <div>
+        <h2 class="text-3xl font-extrabold text-gray-900 mb-6">Make more money and grow your event.</h2>
+        <p class="text-xl text-gray-600 mb-8">Our 0.9% fee is the lowest on the market. It will allow you to keep more profits and help grow your event. The faster your event grows, the closer we are to reaching our mission of ensuring success.</p>
+
+        <a href="#" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+            Want the lowest fee?
+        </a>
+    </div>
+
+    <div>
+        <canvas id="revenueChart"></canvas>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitializeRevenueChart();
+        }
+    }
+
+    private async Task InitializeRevenueChart()
+    {
+        await JSRuntime.InvokeVoidAsync("initializeRevenueChart");
+    }
+}

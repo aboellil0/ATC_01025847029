@@ -1,0 +1,151 @@
+﻿
+    @page "/"  
+
+    @using System.Globalization  
+
+    <div class="container-fluid p-0">  
+       <!-- Navigation Bar -->  
+       <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">  
+           <div class="container">  
+               <a class="navbar-brand" href="#">  
+                   <div class="rounded-circle bg-warning" style="width: 40px; height: 40px;"></div>  
+               </a>  
+               <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">  
+                   <span class="navbar-toggler-icon"></span>  
+               </button>  
+               <div class="collapse navbar-collapse" id="navbarNav">  
+                   <ul class="navbar-nav mx-auto">  
+                       <li class="nav-item">  
+                           <a class="nav-link" href="#">Home</a>  
+                       </li>  
+                       <li class="nav-item">  
+                           <a class="nav-link" href="#">Events</a>  
+                       </li>  
+                       <li class="nav-item">  
+                           <a class="nav-link" href="#">About</a>  
+                       </li>  
+                   </ul>  
+                   <div class="d-flex">  
+                       <a href="#" class="btn btn-outline-dark">Sign in</a>  
+                   </div>  
+               </div>  
+           </div>  
+       </nav>  
+
+       <!-- Main Content -->  
+       <div class="container mt-5">  
+           <div class="row align-items-center">  
+               <!-- Left Column - Text Content -->  
+               <div class="col-lg-6 mb-5 mb-lg-0">  
+                   <h1 class="display-4 fw-bold mb-4">Event Booking System</h1>  
+                   <p class="lead mb-5">Book your tickets for concerts, conferences, and more.</p>  
+                   <a href="#" class="btn btn-primary btn-lg px-5 py-3 rounded-pill">Book Now</a>  
+
+                   <!-- React Logo -->  
+                   <div class="position-relative mt-5">  
+                       <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png"   
+                            alt="React Logo" class="img-fluid" style="max-width: 150px;" />  
+                   </div>  
+               </div>  
+
+               <!-- Right Column - Illustration and Calendar -->  
+               <div class="col-lg-6">  
+                   <div class="position-relative">  
+                       <!-- Pink Background Blob -->  
+                       <div class="position-absolute"   
+                            style="background-color: #FFD6E0; border-radius: 50%; width: 500px; height: 500px; z-index: -1; top: -50px; right: -50px;"></div>  
+
+                       <!-- Person with Laptop Illustration -->  
+                       <div class="position-relative" style="z-index: 1;">  
+                           <img src="https://cdni.iconscout.com/illustration/premium/thumb/woman-booking-ticket-online-4438897-3718534.png"   
+                                alt="Person booking tickets" class="img-fluid" />  
+                       </div>  
+
+                       <!-- Calendar Widget -->  
+                       <div class="card shadow position-absolute" style="width: 300px; right: 0; bottom: 20px;">  
+                           <div class="card-body">  
+                               <h5 class="card-title">@currentMonthYear</h5>  
+                               <table class="table table-sm">  
+                                   <thead>  
+                                       <tr class="text-center">  
+                                           <th>Su</th>  
+                                           <th>Mo</th>  
+                                           <th>Tu</th>  
+                                           <th>We</th>  
+                                           <th>Th</th>  
+                                           <th>Fr</th>  
+                                           <th>Sa</th>  
+                                       </tr>  
+                                   </thead>  
+                                   <tbody class="text-center">  
+                                       @foreach (var week in calendar)  
+                                       {  
+                                           <tr>  
+                                               @foreach (var day in week)  
+                                               {  
+                                                   <td>  
+                                                       @if (day == currentDay)  
+                                                       {  
+                                                           <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 30px; height: 30px;">  
+                                                               @day  
+                                                           </div>  
+                                                       }  
+                                                       else if (day != 0)  
+                                                       {  
+                                                           @day  
+                                                       }  
+                                                   </td>  
+                                               }  
+                                           </tr>  
+                                       }  
+                                   </tbody>  
+                               </table>  
+                           </div>  
+                       </div>  
+
+                       <!-- Purple Accent Circle -->  
+                       <div class="position-absolute bg-primary rounded-circle"   
+                            style="width: 50px; height: 50px; left: 250px; bottom: 150px;"></div>  
+
+                       <!-- Yellow Accent Circle -->  
+                       <div class="position-absolute bg-warning rounded-circle"   
+                            style="width: 30px; height: 30px; left: 50px; bottom: 50px;"></div>  
+                   </div>  
+               </div>  
+           </div>  
+       </div>  
+    </div>  
+
+    @code {  
+       private int currentDay;  
+       private string currentMonthYear;  
+       private List<List<int>> calendar;  
+
+       protected override void OnInitialized()  
+       {  
+           var today = DateTime.Today;  
+           currentDay = today.Day;  
+           currentMonthYear = today.ToString("MMMM yyyy", CultureInfo.InvariantCulture);  
+
+           var daysInMonth = DateTime.DaysInMonth(today.Year, today.Month);  
+           var firstDayOfMonth = new DateTime(today.Year, today.Month, 1).DayOfWeek;  
+
+           calendar = new List<List<int>>();  
+           var week = new List<int>(new int[7]);  
+           var dayIndex = (int)firstDayOfMonth;  
+
+           for (int day = 1; day <= daysInMonth; day++)  
+           {  
+               week[dayIndex] = day;  
+               dayIndex++;  
+
+               if (dayIndex == 7 || day == daysInMonth)  
+               {  
+                   calendar.Add(new List<int>(week));  
+                   week = new List<int>(new int[7]);  
+                   dayIndex = 0;  
+               }  
+           }  
+       }  
+    }
+}
