@@ -21,7 +21,11 @@
 </head>
 
 <body>
-    <div id="app">Loading...</div>
+    <div id="app">
+        <div class="loading-progress">
+            <div class="loading-progress-text"></div>
+        </div>
+    </div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -29,6 +33,8 @@
         <a class="dismiss">🗙</a>
     </div>
 
+
+    <script src="_framework/blazor.webassembly.js"></script>
     <!-- Blazor WebAssembly Script -->
     <script src="_framework/blazor.webassembly.js"></script>
 

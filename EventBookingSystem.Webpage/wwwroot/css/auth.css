@@ -1,0 +1,156 @@
+﻿.auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #F8FAFC;
+    padding: 20px;
+}
+
+.auth-card {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+    .auth-header h2 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 8px;
+    }
+
+    .auth-header p {
+        font-size: 14px;
+        color: #64748B;
+        margin: 0;
+    }
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #1E293B;
+        margin-bottom: 8px;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+    }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #1A56DB;
+        }
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #64748B;
+    cursor: pointer;
+}
+
+    .checkbox-container input {
+        margin-right: 8px;
+    }
+
+.forgot-link {
+    font-size: 14px;
+    color: #1A56DB;
+    text-decoration: none;
+}
+
+    .forgot-link:hover {
+        text-decoration: underline;
+    }
+
+.auth-button {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.login-button {
+    background-color: #1A56DB;
+    color: white;
+}
+
+    .login-button:hover {
+        background-color: #1443a6;
+    }
+
+.google-button {
+    background-color: white;
+    color: #1E293B;
+    border: 1px solid #E2E8F0;
+}
+
+    .google-button:hover {
+        background-color: #F8FAFC;
+    }
+
+    .google-button img {
+        height: 18px;
+        margin-right: 8px;
+    }
+
+.auth-footer {
+    text-align: center;
+    margin-top: 24px;
+}
+
+    .auth-footer p {
+        font-size: 14px;
+        color: #64748B;
+        margin: 0;
+    }
+
+    .auth-footer a {
+        color: #1A56DB;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+@media (max-width: 576px) {
+    .auth-card {
+        padding: 24px;
+    }
+}

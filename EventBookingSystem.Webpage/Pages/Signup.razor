@@ -1,0 +1,57 @@
+﻿@page "/signup"
+@inject NavigationManager NavigationManager
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Sign up for TicketsCandy</h2>
+            <p>Create your account to get started</p>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="Enter your name" />
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="Enter your email" />
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••" />
+        </div>
+
+        <div class="form-options">
+            <label class="checkbox-container">
+                <input type="checkbox" id="terms" />
+                <span class="checkmark"></span>
+                I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>
+            </label>
+        </div>
+
+        <button class="auth-button login-button" @onclick="HandleSignup">Create Account</button>
+        <button class="auth-button google-button">
+            <img src="images/google-icon.svg" alt="Google" />
+            <span>Sign up with Google</span>
+        </button>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a href="/login" @onclick:preventDefault="true" @onclick="NavigateToLogin">Log in</a></p>
+        </div>
+    </div>
+</div>
+
+@code {
+    private void HandleSignup()
+    {
+        // Handle signup logic here
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void NavigateToLogin()
+    {
+        NavigationManager.NavigateTo("/login");
+    }
+}

@@ -1,0 +1,53 @@
+﻿@page "/login"
+@inject NavigationManager NavigationManager
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Log In to TicketsCandy</h2>
+            <p>Welcome back! Please enter your details.</p>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="Enter your email" />
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••" />
+        </div>
+
+        <div class="form-options">
+            <label class="checkbox-container">
+                <input type="checkbox" id="remember" />
+                <span class="checkmark"></span>
+                Remember me
+            </label>
+            <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <button class="auth-button login-button" @onclick="HandleLogin">Log In</button>
+        <button class="auth-button google-button">
+            <img src="images/google-icon.svg" alt="Google" />
+            <span>Sign in with Google</span>
+        </button>
+
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="/signup" @onclick:preventDefault="true" @onclick="NavigateToSignup">Sign up</a></p>
+        </div>
+    </div>
+</div>
+
+@code {
+    private void HandleLogin()
+    {
+        // Handle login logic here
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void NavigateToSignup()
+    {
+        NavigationManager.NavigateTo("/signup");
+    }
+}
