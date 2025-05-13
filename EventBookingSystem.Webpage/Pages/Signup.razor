@@ -1,5 +1,6 @@
 ﻿@page "/signup"
 @inject NavigationManager NavigationManager
+@inject HttpClient Http
 
 <div class="auth-container">
     <div class="auth-card">
@@ -8,30 +9,61 @@
             <p>Create your account to get started</p>
         </div>
 
-        <div class="form-group">
-            <label for="name">Full Name</label>
-            <input type="text" id="name" placeholder="Enter your name" />
-        </div>
+        <EditForm Model="@registerModel" OnValidSubmit="HandleSignup">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Enter your email" />
-        </div>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <InputText id="username" class="form-control" @bind-Value="registerModel.UserName" />
+                <ValidationMessage For="@(() => registerModel.UserName)" />
+            </div>
 
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="••••••••" />
-        </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <InputText id="firstName" class="form-control" @bind-Value="registerModel.FirstName" />
+                    <ValidationMessage For="@(() => registerModel.FirstName)" />
+                </div>
 
-        <div class="form-options">
-            <label class="checkbox-container">
-                <input type="checkbox" id="terms" />
-                <span class="checkmark"></span>
-                I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>
-            </label>
-        </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <InputText id="lastName" class="form-control" @bind-Value="registerModel.LastName" />
+                    <ValidationMessage For="@(() => registerModel.LastName)" />
+                </div>
+            </div>
 
-        <button class="auth-button login-button" @onclick="HandleSignup">Create Account</button>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <InputText id="email" type="email" class="form-control" @bind-Value="registerModel.Email" />
+                <ValidationMessage For="@(() => registerModel.Email)" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="registerModel.Password" />
+                <ValidationMessage For="@(() => registerModel.Password)" />
+            </div>
+
+            <div class="form-group">
+                <label for="birthday">Birthday</label>
+                <InputDate id="birthday" class="form-control" @bind-Value="registerModel.BirthdayDateTime" />
+                <ValidationMessage For="@(() => registerModel.Birthaday)" />
+            </div>
+
+            <div class="form-options">
+                <label class="checkbox-container">
+                    <input type="checkbox" @bind="acceptedTerms" />
+                    <span class="checkmark"></span>
+                    I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>
+                </label>
+            </div>
+
+            <button type="submit" class="auth-button login-button" disabled="@(!acceptedTerms)">
+                Create Account
+            </button>
+        </EditForm>
+
         <button class="auth-button google-button">
             <img src="images/google-icon.svg" alt="Google" />
             <span>Sign up with Google</span>
@@ -44,10 +76,36 @@
 </div>
 
 @code {
-    private void HandleSignup()
+    private RegisterModel registerModel = new();
+    private bool acceptedTerms;
+
+    private class RegisterModel
     {
-        // Handle signup logic here
-        NavigationManager.NavigateTo("/");
+        public string UserName { get; set; }
+        public string Password { get; set; }
+        public string Email { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; } = string.Empty;
+        public DateTime BirthdayDateTime { get; set; } = DateTime.Today;
+        public DateOnly Birthaday => DateOnly.FromDateTime(BirthdayDateTime);
+    }
+
+    private async Task HandleSignup()
+    {
+        if (!acceptedTerms) return;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/auth/register", registerModel);
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/login");
+            }
+        }
+        catch (Exception)
+        {
+            // Handle error
+        }
     }
 
     private void NavigateToLogin()
