@@ -51,12 +51,16 @@
                 <ValidationMessage For="@(() => registerModel.Birthaday)" />
             </div>
 
-            <div class="form-options">
-                <label class="checkbox-container">
-                    <input type="checkbox" @bind="acceptedTerms" />
-                    <span class="checkmark"></span>
-                    I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>
-                </label>
+            <div class="form-options d-flex flex-column">
+                <div>
+                    <label class="checkbox-container">
+                        <input type="checkbox" @bind="acceptedTerms" />
+                        <span class="checkmark">I agree to the </span>
+                    </label>
+                </div>
+                <div>
+                    <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>
+                </div>
             </div>
 
             <button type="submit" class="auth-button login-button" disabled="@(!acceptedTerms)">
