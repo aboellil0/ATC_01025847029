@@ -1,0 +1,280 @@
+﻿@page "/events"
+@inject NavigationManager NavigationManager
+
+<div class="events-page-container">
+    <div class="events-header">
+        <h1>Discover Events</h1>
+        <p>Find and book amazing events that match your interests</p>
+    </div>
+
+    <div class="search-section">
+        <div class="search-bar">
+            <input type="text"
+                   placeholder="Search events..."
+                   @bind-value="searchQuery"
+                   @bind-value:event="oninput"
+                   @onkeyup="HandleSearch" />
+            <button class="search-button">
+                🔍
+            </button>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label>Category</label>
+                <select @bind="selectedCategory">
+                    <option value="">All Categories</option>
+                    @foreach (var category in Categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Date</label>
+                <select @bind="selectedDate">
+                    <option value="">Any Date</option>
+                    <option value="today">Today</option>
+                    <option value="tomorrow">Tomorrow</option>
+                    <option value="weekend">This Weekend</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Price Range</label>
+                <select @bind="selectedPrice">
+                    <option value="">Any Price</option>
+                    <option value="free">Free</option>
+                    <option value="paid">Paid</option>
+                    <option value="0-50">$0 - $50</option>
+                    <option value="50-100">$50 - $100</option>
+                    <option value="100+">$100+</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="active-filters">
+        @if (!string.IsNullOrEmpty(searchQuery))
+        {
+            <div class="filter-tag">
+                Search: @searchQuery
+                <button @onclick="() => ClearSearch()">×</button>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(selectedCategory))
+        {
+            <div class="filter-tag">
+                Category: @Categories.First(c => c.Id.ToString() == selectedCategory).Name
+                <button @onclick="() => selectedCategory = string.Empty">×</button>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(selectedDate))
+        {
+            <div class="filter-tag">
+                Date: @selectedDate
+                <button @onclick="() => selectedDate = string.Empty">×</button>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(selectedPrice))
+        {
+            <div class="filter-tag">
+                Price: @selectedPrice
+                <button @onclick="() => selectedPrice = string.Empty">×</button>
+            </div>
+        }
+    </div>
+
+    <div class="events-grid">
+        @foreach (var evt in FilteredEvents)
+        {
+            <div class="event-card">
+                <div class="event-card-image">
+                    <img src="@evt.ImageUrl" alt="@evt.Title" />
+                    <div class="event-card-date">
+                        <span class="date-day">@evt.Date.Day</span>
+                        <span class="date-month">@evt.Date.ToString("MMM")</span>
+                    </div>
+                    @if (evt.IsFeatured)
+                    {
+                        <div class="featured-badge">Featured</div>
+                    }
+                </div>
+                <div class="event-card-content">
+                    <div class="event-category">@Categories.First(c => c.Id == evt.CategoryId).Name</div>
+                    <h3 class="event-card-title">@evt.Title</h3>
+                    <p class="event-card-location">@evt.Location</p>
+                    <div class="event-card-footer">
+                        <span class="event-card-price">@evt.Price</span>
+                        <button class="btn btn-book" @onclick="() => BookEvent(evt.Id)">Book Now</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!FilteredEvents.Any())
+    {
+        <div class="no-results">
+            <h3>No events found</h3>
+            <p>Try adjusting your filters or search criteria</p>
+        </div>
+    }
+</div>
+
+@code {
+    private string searchQuery = string.Empty;
+    private string selectedCategory = string.Empty;
+    private string selectedDate = string.Empty;
+    private string selectedPrice = string.Empty;
+
+    private List<CategoryModel> Categories = new()
+    {
+        new() { Id = 1, Name = "Music", Icon = "🎵", EventCount = 156 },
+        new() { Id = 2, Name = "Sports", Icon = "⚽", EventCount = 89 },
+        new() { Id = 3, Name = "Arts", Icon = "🎨", EventCount = 124 },
+        new() { Id = 4, Name = "Food", Icon = "🍽️", EventCount = 67 },
+        new() { Id = 5, Name = "Business", Icon = "💼", EventCount = 93 },
+        new() { Id = 6, Name = "Technology", Icon = "💻", EventCount = 78 }
+    };
+
+    private List<EventModel> AllEvents = new()
+    {
+        new() {
+            Id = 1,
+            Title = "Summer Music Festival",
+            Location = "Central Park, NY",
+            Date = DateTime.Parse("2024-06-28"),
+            Price = "$99",
+            ImageUrl = "https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg",
+            CategoryId = 1,
+            IsFeatured = true
+        },
+        new() {
+            Id = 2,
+            Title = "Food & Wine Expo",
+            Location = "Convention Center",
+            Date = DateTime.Parse("2024-07-15"),
+            Price = "$45",
+            ImageUrl = "https://images.pexels.com/photos/541216/pexels-photo-541216.jpeg",
+            CategoryId = 4
+        },
+        new() {
+            Id = 3,
+            Title = "Tech Conference 2024",
+            Location = "Innovation Hub",
+            Date = DateTime.Parse("2024-08-05"),
+            Price = "$149",
+            ImageUrl = "https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg",
+            CategoryId = 6,
+            IsFeatured = true
+        },
+        new() {
+            Id = 4,
+            Title = "Modern Art Exhibition",
+            Location = "Metropolitan Museum",
+            Date = DateTime.Parse("2024-07-20"),
+            Price = "$25",
+            ImageUrl = "https://images.pexels.com/photos/1509534/pexels-photo-1509534.jpeg",
+            CategoryId = 3
+        },
+        new() {
+            Id = 5,
+            Title = "Championship Finals",
+            Location = "Sports Arena",
+            Date = DateTime.Parse("2024-08-15"),
+            Price = "$75",
+            ImageUrl = "https://images.pexels.com/photos/976873/pexels-photo-976873.jpeg",
+            CategoryId = 2
+        },
+        new() {
+            Id = 6,
+            Title = "Startup Summit",
+            Location = "Business Center",
+            Date = DateTime.Parse("2024-07-25"),
+            Price = "$199",
+            ImageUrl = "https://images.pexels.com/photos/2182973/pexels-photo-2182973.jpeg",
+            CategoryId = 5
+        }
+    };
+
+    private IEnumerable<EventModel> FilteredEvents => AllEvents
+        .Where(e => string.IsNullOrEmpty(searchQuery) ||
+                   e.Title.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                   e.Location.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
+        .Where(e => string.IsNullOrEmpty(selectedCategory) ||
+                   e.CategoryId.ToString() == selectedCategory)
+        .Where(e => FilterByDate(e))
+        .Where(e => FilterByPrice(e));
+
+    private bool FilterByDate(EventModel evt)
+    {
+        if (string.IsNullOrEmpty(selectedDate)) return true;
+
+        return selectedDate switch
+        {
+            "today" => evt.Date.Date == DateTime.Today,
+            "tomorrow" => evt.Date.Date == DateTime.Today.AddDays(1),
+            "weekend" => evt.Date.Date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday,
+            "week" => evt.Date.Date <= DateTime.Today.AddDays(7),
+            "month" => evt.Date.Date <= DateTime.Today.AddMonths(1),
+            _ => true
+        };
+    }
+
+    private bool FilterByPrice(EventModel evt)
+    {
+        if (string.IsNullOrEmpty(selectedPrice)) return true;
+
+        var price = decimal.Parse(evt.Price.TrimStart('$'));
+        return selectedPrice switch
+        {
+            "free" => price == 0,
+            "paid" => price > 0,
+            "0-50" => price <= 50,
+            "50-100" => price > 50 && price <= 100,
+            "100+" => price > 100,
+            _ => true
+        };
+    }
+
+    private void HandleSearch()
+    {
+        // Implement real-time search
+        StateHasChanged();
+    }
+
+    private void ClearSearch()
+    {
+        searchQuery = string.Empty;
+        StateHasChanged();
+    }
+
+    private void BookEvent(int eventId)
+    {
+        NavigationManager.NavigateTo($"/events/{eventId}/book");
+    }
+
+    private class EventModel
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Location { get; set; }
+        public DateTime Date { get; set; }
+        public string Price { get; set; }
+        public string ImageUrl { get; set; }
+        public int CategoryId { get; set; }
+        public bool IsFeatured { get; set; }
+    }
+
+    private class CategoryModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Icon { get; set; }
+        public int EventCount { get; set; }
+    }
+}
