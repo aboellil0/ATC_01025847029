@@ -1,0 +1,252 @@
+﻿@page "/events/{Id:int}/book"
+@inject NavigationManager NavigationManager
+
+<div class="event-details-container">
+    @if (selectedEvent != null)
+    {
+        <div class="event-details-header">
+            <button class="back-button" @onclick="NavigateBack">← Back to Events</button>
+            <div class="event-category">@GetCategoryName(selectedEvent.CategoryId)</div>
+            <h1>@selectedEvent.Title</h1>
+            <p class="event-subtitle">@selectedEvent.Location</p>
+        </div>
+
+        <div class="event-details-content">
+            <div class="event-main-content">
+                <div class="event-image-container">
+                    <img src="@selectedEvent.ImageUrl" alt="@selectedEvent.Title" />
+                    @if (selectedEvent.IsFeatured)
+                    {
+                        <div class="featured-badge">Featured Event</div>
+                    }
+                </div>
+
+                <div class="event-info-section">
+                    <h2>About This Event</h2>
+                    <p>@selectedEvent.Description</p>
+
+                    <div class="event-highlights">
+                        <div class="highlight-item">
+                            <span class="highlight-icon">📅</span>
+                            <div class="highlight-info">
+                                <h3>Date and Time</h3>
+                                <p>@selectedEvent.Date.ToString("dddd, MMMM d, yyyy")</p>
+                                <p>@selectedEvent.Time</p>
+                            </div>
+                        </div>
+
+                        <div class="highlight-item">
+                            <span class="highlight-icon">📍</span>
+                            <div class="highlight-info">
+                                <h3>Location</h3>
+                                <p>@selectedEvent.Location</p>
+                                <p>@selectedEvent.Address</p>
+                            </div>
+                        </div>
+
+                        <div class="highlight-item">
+                            <span class="highlight-icon">👥</span>
+                            <div class="highlight-info">
+                                <h3>Organizer</h3>
+                                <p>@selectedEvent.Organizer</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (selectedEvent.Amenities.Any())
+                    {
+                        <div class="amenities-section">
+                            <h2>Event Amenities</h2>
+                            <div class="amenities-grid">
+                                @foreach (var amenity in selectedEvent.Amenities)
+                                {
+                                    <div class="amenity-item">
+                                        <span class="amenity-icon">@amenity.Icon</span>
+                                        <span class="amenity-name">@amenity.Name</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="booking-sidebar">
+                <div class="booking-card">
+                    <div class="price-section">
+                        <h2>@selectedEvent.Price</h2>
+                        <p>per ticket</p>
+                    </div>
+
+                    <div class="ticket-selection">
+                        <label for="ticketCount">Number of Tickets</label>
+                        <div class="ticket-counter">
+                            <button class="counter-btn" @onclick="DecreaseTickets" disabled="@(ticketCount <= 1)">-</button>
+                            <input type="number" id="ticketCount" min="1" max="10" @bind="ticketCount" />
+                            <button class="counter-btn" @onclick="IncreaseTickets" disabled="@(ticketCount >= 10)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="price-breakdown">
+                        <div class="breakdown-item">
+                            <span>Tickets (@ticketCount x @selectedEvent.Price)</span>
+                            <span>$@(GetSubtotal().ToString("F2"))</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span>Service Fee</span>
+                            <span>$@(GetServiceFee().ToString("F2"))</span>
+                        </div>
+                        <div class="breakdown-total">
+                            <span>Total</span>
+                            <span>$@(GetTotal().ToString("F2"))</span>
+                        </div>
+                    </div>
+
+                    <button class="book-button" @onclick="ProceedToCheckout">
+                        Proceed to Checkout
+                    </button>
+
+                    <div class="booking-info">
+                        <p><span>🎟️</span> @selectedEvent.TicketsLeft tickets left</p>
+                        <p><span>⭐</span> @selectedEvent.SoldCount tickets sold</p>
+                    </div>
+                </div>
+
+                <div class="share-section">
+                    <p>Share this event</p>
+                    <div class="share-buttons">
+                        <button class="share-btn">📱</button>
+                        <button class="share-btn">💬</button>
+                        <button class="share-btn">📧</button>
+                        <button class="share-btn">🔗</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="not-found">
+            <h2>Event Not Found</h2>
+            <p>The event you're looking for doesn't exist or has been removed.</p>
+            <button class="btn btn-primary" @onclick="NavigateBack">Back to Events</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private EventDetailsModel selectedEvent;
+    private int ticketCount = 1;
+
+    protected override void OnInitialized()
+    {
+        // Simulated event data
+        selectedEvent = new EventDetailsModel
+            {
+                Id = Id,
+                Title = "Summer Music Festival",
+                Location = "Central Park",
+                Address = "Central Park, New York, NY 10022",
+                Date = DateTime.Parse("2024-06-28"),
+                Time = "4:00 PM - 11:00 PM",
+                Price = "$99.00",
+                ImageUrl = "https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg",
+                CategoryId = 1,
+                IsFeatured = true,
+                Description = "Join us for an unforgettable summer evening filled with live music, great food, and amazing atmosphere. Featuring top artists from around the world, this festival promises to be the highlight of your summer!",
+                Organizer = "EventsCandy Productions",
+                TicketsLeft = 156,
+                SoldCount = 844,
+                Amenities = new List<AmenityModel>
+            {
+                new() { Icon = "🎵", Name = "Live Music" },
+                new() { Icon = "🍔", Name = "Food Vendors" },
+                new() { Icon = "🚗", Name = "Parking Available" },
+                new() { Icon = "🌧️", Name = "Weather Protection" },
+                new() { Icon = "♿", Name = "Wheelchair Accessible" },
+                new() { Icon = "🚻", Name = "Restrooms" }
+            }
+            };
+    }
+
+    private string GetCategoryName(int categoryId)
+    {
+        var categories = new Dictionary<int, string>
+        {
+            { 1, "Music" },
+            { 2, "Sports" },
+            { 3, "Arts" },
+            { 4, "Food" },
+            { 5, "Business" },
+            { 6, "Technology" }
+        };
+
+        return categories.GetValueOrDefault(categoryId, "Event");
+    }
+
+    private void IncreaseTickets()
+    {
+        if (ticketCount < 10)
+            ticketCount++;
+    }
+
+    private void DecreaseTickets()
+    {
+        if (ticketCount > 1)
+            ticketCount--;
+    }
+
+    private decimal GetSubtotal()
+    {
+        var price = decimal.Parse(selectedEvent.Price.TrimStart('$'));
+        return price * ticketCount;
+    }
+
+    private decimal GetServiceFee()
+    {
+        return GetSubtotal() * 0.1m; // 10% service fee
+    }
+
+    private decimal GetTotal()
+    {
+        return GetSubtotal() + GetServiceFee();
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/events");
+    }
+
+    private void ProceedToCheckout()
+    {
+        NavigationManager.NavigateTo($"/checkout/{Id}?tickets={ticketCount}");
+    }
+
+    private class EventDetailsModel
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Location { get; set; }
+        public string Address { get; set; }
+        public DateTime Date { get; set; }
+        public string Time { get; set; }
+        public string Price { get; set; }
+        public string ImageUrl { get; set; }
+        public int CategoryId { get; set; }
+        public bool IsFeatured { get; set; }
+        public string Description { get; set; }
+        public string Organizer { get; set; }
+        public int TicketsLeft { get; set; }
+        public int SoldCount { get; set; }
+        public List<AmenityModel> Amenities { get; set; }
+    }
+
+    private class AmenityModel
+    {
+        public string Icon { get; set; }
+        public string Name { get; set; }
+    }
+}
