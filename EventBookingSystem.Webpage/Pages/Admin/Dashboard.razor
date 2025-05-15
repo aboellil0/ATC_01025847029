@@ -1,0 +1,79 @@
+﻿@page "/admin"
+@* @attribute [Authorize(Roles = "Admin")] *@
+@inject NavigationManager NavigationManager
+
+<div class="admin-container">
+    <div class="admin-sidebar">
+        <div class="admin-logo">
+            <img src="images/ticket-icon.svg" alt="EventsCandy Logo" />
+            <span>Admin Panel</span>
+        </div>
+        
+        <nav class="admin-nav">
+            <button class="nav-item @(currentView == "dashboard" ? "active" : "")" 
+                    @onclick='() => SwitchView("dashboard")'>
+                📊 Dashboard
+            </button>
+            <button class="nav-item @(currentView == "events" ? "active" : "")" 
+                    @onclick='() => SwitchView("events")'>
+                🎫 Events
+            </button>
+            <button class="nav-item @(currentView == "users" ? "active" : "")" 
+                    @onclick='() => SwitchView("users")'>
+                👥 Users
+            </button>
+            <button class="nav-item @(currentView == "bookings" ? "active" : "")" 
+                    @onclick='() => SwitchView("bookings")'>
+                📝 Bookings
+            </button>
+        </nav>
+    </div>
+
+    <div class="admin-main">
+        <header class="admin-header">
+            <div class="header-search">
+                <input type="text" placeholder="Search..." />
+                <button>🔍</button>
+            </div>
+            
+            <div class="header-actions">
+                <button class="notifications-btn">
+                    🔔
+                    <span class="notification-badge">3</span>
+                </button>
+                <div class="admin-profile">
+                    <img src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg" 
+                         alt="Admin profile" />
+                    <span>Admin User</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="admin-content">
+            @switch (currentView)
+            {
+                case "dashboard":
+                    <DashboardOverview />
+                    break;
+                case "events":
+                    <EventManagement />
+                    break;
+                case "users":
+                    <UserManagement />
+                    break;
+                case "bookings":
+                    <BookingManagement />
+                    break;
+            }
+        </main>
+    </div>
+</div>
+
+@code {
+    private string currentView = "dashboard";
+
+    private void SwitchView(string view)
+    {
+        currentView = view;
+    }
+}
