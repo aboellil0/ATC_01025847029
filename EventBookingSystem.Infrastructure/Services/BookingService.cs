@@ -18,14 +18,12 @@ namespace EventBookingSystem.Infrastructure.Services
         private readonly IEventRepository _eventRepository;
         private readonly IUserRepository _userRepository;
         private readonly ILogger<BookingService> _logger;
-        private readonly IMapper _mapper;
-        public BookingService(IBookingRepository bookingRepository, IEventRepository eventRepository, IUserRepository userRepository, ILogger<BookingService> logger, IMapper mapper = null)
+        public BookingService(IBookingRepository bookingRepository, IEventRepository eventRepository, IUserRepository userRepository, ILogger<BookingService> logger)
         {
             _bookingRepository = bookingRepository;
             _eventRepository = eventRepository;
             _userRepository = userRepository;
             _logger = logger;
-            _mapper = mapper;
         }
 
         public async Task<BookingDto> CreateBookingAsync(Guid userId, BookingCreateDto bookingCreateDto)
@@ -105,5 +103,17 @@ namespace EventBookingSystem.Infrastructure.Services
             return await _bookingRepository.HasUserBookedEventAsync(userId, eventId);
         }
 
+        public async Task<bool> CancelBookingAsync(Guid userId, Guid bookingId)
+        {
+            var booking = await _bookingRepository.GetBookingByIdAsync(bookingId);
+            if (booking == null || booking.UserId != userId)
+            {
+                _logger.LogError($"Booking with ID {bookingId} not found or does not belong to user with ID {userId}.");
+                throw new Exception($"Booking with ID {bookingId} not found or does not belong to user with ID {userId}.");
+            }
+            await _bookingRepository.DeleteBookingAsync(bookingId);
+            _logger.LogInformation($"Booking with ID {bookingId} has been cancelled for user with ID {userId}.");
+            return true;
+        }
     }
 }

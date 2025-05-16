@@ -12,5 +12,8 @@ namespace EventBookingSystem.Core.Interfaces.Repositories
         Task<IReadOnlyList<Booking>> GetBookingsByUserIdAsync(Guid userId);
         Task<bool> HasUserBookedEventAsync(Guid userId, Guid eventId);
         Task<Booking> CreateBookingAsync(Booking booking);
+        Task<Booking> UpdateBookingAsync(Booking booking);
+        Task<bool> DeleteBookingAsync(Guid bookingId);
+        Task<Booking> GetBookingByIdAsync(Guid bookingId);
     }
 }

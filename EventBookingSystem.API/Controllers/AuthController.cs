@@ -1,6 +1,7 @@
 ﻿
 using EventBookingSystem.Core.DTOs.Auth;
 using EventBookingSystem.Core.Entities;
+using EventBookingSystem.Core.Interfaces.Repositories;
 using EventBookingSystem.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.AccessControl;
 using System.Security.Claims;
 
 namespace BankingSystem.UserService.Api.Controllers
@@ -19,12 +21,14 @@ namespace BankingSystem.UserService.Api.Controllers
         private readonly IAuthService _authService;
         private readonly ILogger<AuthController> _logger;
         private readonly ITokenService _TokenService;
+        private readonly IUserRepository _userRepository;
 
-        public AuthController(IAuthService authService, ITokenService tokenService, ILogger<AuthController> logger)
+        public AuthController(IAuthService authService, ITokenService tokenService, ILogger<AuthController> logger, IUserRepository userRepository)
         {
             _authService = authService;
             _TokenService = tokenService;
             _logger = logger;
+            _userRepository = userRepository;
         }
 
 
@@ -56,6 +60,14 @@ namespace BankingSystem.UserService.Api.Controllers
             return Ok(response);
         }
 
+        [HttpGet("me"),Authorize]
+        public async Task<ActionResult<ApplicationUser>> GetCurrentUser()
+        {
+            var UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userRepository.GetUserByIdAsync(Guid.Parse(UserId));
+            return Ok(user);    
+        }
+
         [Authorize]
         [HttpPost("refresh")]
         public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] RefreshTokenReq request)
@@ -67,18 +79,6 @@ namespace BankingSystem.UserService.Api.Controllers
             }
             return Ok(response);
         }
-
-        //[Authorize]
-        //[HttpPost("revoke")]
-        //public async Task<IActionResult> RevokeToken([FromBody] string token)
-        //{
-        //    var success = await _TokenService.RevokeTokenAsync(token);
-        //    if (!success)
-        //    {
-        //        return BadRequest("Token revocation failed");
-        //    }
-        //    return Ok();
-        //}
 
         [Authorize]
         [HttpPost("logout")]
