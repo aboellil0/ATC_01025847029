@@ -62,10 +62,10 @@ namespace EventBookingSystem.Infrastructure.Services
             var bookingDto = new BookingDto
             {
                 Id = createdBooking.Id,
+                UserId = userId,
+                User = new simpleUserInformations { email = user.Email, name = user.FirstName+" "+user.LastName, userName = user.UserName },
                 EventId = eventEntity.Id,
-                EventName = eventEntity.Name,
-                EventDate = eventEntity.EventDate,
-                Venue = eventEntity.Venue,
+                Event = new simplieEventInformations { name = eventEntity.Name, vanue = eventEntity.Venue, startDate = eventEntity.EventDate },
                 BookingDate = createdBooking.BookingDate
             };
 
@@ -87,10 +87,10 @@ namespace EventBookingSystem.Infrastructure.Services
                 bookingDtos.Add(new BookingDto
                 {
                     Id = booking.Id,
-                    EventId = booking.EventId,
-                    EventName = booking.Event.Name,
-                    EventDate = booking.Event.EventDate,
-                    Venue = booking.Event.Venue,
+                    UserId = booking.UserId,
+                    User = new simpleUserInformations { email = booking.User.Email, name = booking.User.FirstName + " " + booking.User.LastName, userName = booking.User.UserName },
+                    EventId = booking.Id,
+                    Event = new simplieEventInformations { name = booking.Event.Name, vanue = booking.Event.Venue, startDate = booking.Event.EventDate },
                     BookingDate = booking.BookingDate
                 });
             }

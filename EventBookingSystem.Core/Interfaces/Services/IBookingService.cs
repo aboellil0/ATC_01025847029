@@ -12,6 +12,6 @@ namespace EventBookingSystem.Core.Interfaces.Services
         Task<BookingDto> CreateBookingAsync(Guid userId, BookingCreateDto bookingCreateDto);
         Task<IReadOnlyList<BookingDto>> GetUserBookingsAsync(Guid userId);
         Task<bool> HasUserBookedEventAsync(Guid userId, Guid eventId);
-        Task<bool> CancelBookingAsync(Guid userId, Guid bookingId)
+        Task<bool> CancelBookingAsync(Guid userId, Guid bookingId);
     }
 }

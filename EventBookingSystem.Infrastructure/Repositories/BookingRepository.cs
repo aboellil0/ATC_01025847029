@@ -68,5 +68,23 @@ namespace EventBookingSystem.Infrastructure.Repositories
             }
             return booking;
         }
+
+        public async Task<IReadOnlyList<Booking>> GetBookingsByEventIdAsync(Guid eventId)
+        {
+            return await _context.Bookings
+                .Include(b => b.Event)
+                .Where(b => b.EventId == eventId)
+                .OrderByDescending(b => b.BookingDate)
+                .ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<Booking>> GetAllBookingsAsync()
+        {
+            return await _context.Bookings
+                .Include(b => b.Event)
+                .Include(b => b.User)
+                .OrderByDescending(b => b.BookingDate)
+                .ToListAsync();
+        }
     }
 }

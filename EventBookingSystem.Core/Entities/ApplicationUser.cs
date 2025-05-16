@@ -55,5 +55,15 @@ namespace EventBookingSystem.Core.Entities
             IsPhoneVerified = true;
             UpdatedAt = DateTime.UtcNow;
         }
+
+        public void Update(string email, string username, string fname, string lname, DateOnly dateOfBirth)
+        {
+            Email = email;
+            UserName = username;
+            FirstName = fname;
+            LastName = lname;
+            DateOfBirth = dateOfBirth.ToDateTime(TimeOnly.MinValue);
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }
