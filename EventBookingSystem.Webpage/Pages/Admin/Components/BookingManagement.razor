@@ -1,0 +1,324 @@
+﻿@page "/admin/bookings"
+@* @attribute [Authorize(Roles = "Admin")] *@
+
+<div class="admin-content-section">
+    <div class="section-header">
+        <h2>Booking Management</h2>
+        <div class="header-actions">
+            <button class="btn btn-secondary" @onclick="ExportBookings">
+                Export CSV
+            </button>
+            <button class="btn btn-primary" @onclick="OpenCreateBookingModal">
+                Create Booking
+            </button>
+        </div>
+    </div>
+
+    <div class="search-filter-section">
+        <div class="search-box">
+            <input type="text"
+                   placeholder="Search bookings..."
+                   @bind-value="searchQuery"
+                   @bind-value:event="oninput" />
+            <button class="search-btn">🔍</button>
+        </div>
+        <div class="filter-box">
+            <select @bind="selectedStatus">
+                <option value="">All Status</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Pending">Pending</option>
+                <option value="Cancelled">Cancelled</option>
+                <option value="Completed">Completed</option>
+            </select>
+            <select @bind="selectedEvent">
+                <option value="">All Events</option>
+                @foreach (var evt in Events)
+                {
+                    <option value="@evt.Id">@evt.Title</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="bookings-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Event</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Tickets</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var booking in FilteredBookings)
+                {
+                    <tr>
+                        <td>@booking.Id</td>
+                        <td class="event-cell">
+                            <img src="@Events.First(e => e.Id == booking.EventId).ImageUrl"
+                                 alt="@Events.First(e => e.Id == booking.EventId).Title" />
+                            <div class="event-info">
+                                <span class="event-title">
+                                    @Events.First(e => e.Id == booking.EventId).Title
+                                </span>
+                                <span class="event-date">
+                                    @Events.First(e => e.Id == booking.EventId).Date.ToString("MMM dd, yyyy")
+                                </span>
+                            </div>
+                        </td>
+                        <td class="customer-cell">
+                            <img src="@booking.CustomerAvatar" alt="@booking.CustomerName" />
+                            <div class="customer-info">
+                                <span class="customer-name">@booking.CustomerName</span>
+                                <span class="customer-email">@booking.CustomerEmail</span>
+                            </div>
+                        </td>
+                        <td>@booking.BookingDate.ToString("MMM dd, yyyy HH:mm")</td>
+                        <td>@booking.TicketCount</td>
+                        <td>@booking.TotalAmount</td>
+                        <td>
+                            <span class="status-badge @booking.Status.ToLower()">@booking.Status</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn view" @onclick="() => ViewBooking(booking)">
+                                    👁️
+                                </button>
+                                <button class="action-btn edit" @onclick="() => EditBooking(booking)">
+                                    ✏️
+                                </button>
+                                @if (booking.Status != "Cancelled" && booking.Status != "Completed")
+                                {
+                                    <button class="action-btn cancel" @onclick="() => CancelBooking(booking)">
+                                        ❌
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (showCreateModal)
+    {
+        <div class="modal-overlay">
+            <div class="modal-content">
+                <h3>Create New Booking</h3>
+                <EditForm Model="@newBooking" OnValidSubmit="HandleCreateBooking">
+                    <DataAnnotationsValidator />
+
+                    <div class="form-group">
+                        <label>Event</label>
+                        <InputSelect @bind-Value="newBooking.EventId" class="form-control">
+                            @foreach (var evt in Events.Where(e => e.Status == "Active"))
+                            {
+                                <option value="@evt.Id">@evt.Title</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Customer Name</label>
+                            <InputText @bind-Value="newBooking.CustomerName" class="form-control" />
+                            <ValidationMessage For="@(() => newBooking.CustomerName)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Customer Email</label>
+                            <InputText @bind-Value="newBooking.CustomerEmail" class="form-control" />
+                            <ValidationMessage For="@(() => newBooking.CustomerEmail)" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Number of Tickets</label>
+                            <InputNumber @bind-Value="newBooking.TicketCount" class="form-control" />
+                            <ValidationMessage For="@(() => newBooking.TicketCount)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Status</label>
+                            <InputSelect @bind-Value="newBooking.Status" class="form-control">
+                                <option value="Confirmed">Confirmed</option>
+                                <option value="Pending">Pending</option>
+                            </InputSelect>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Create Booking
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string searchQuery = string.Empty;
+    private string selectedStatus = string.Empty;
+    private string selectedEvent = string.Empty;
+    private bool showCreateModal = false;
+    private BookingModel newBooking = new();
+
+    private List<EventModel> Events = new()
+    {
+        new() {
+            Id = 1,
+            Title = "Summer Music Festival",
+            Date = DateTime.Parse("2024-06-28"),
+            Status = "Active",
+            ImageUrl = "https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg"
+        },
+        new() {
+            Id = 2,
+            Title = "Tech Conference 2024",
+            Date = DateTime.Parse("2024-08-05"),
+            Status = "Active",
+            ImageUrl = "https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg"
+        },
+        new() {
+            Id = 3,
+            Title = "Food & Wine Expo",
+            Date = DateTime.Parse("2024-07-15"),
+            Status = "Active",
+            ImageUrl = "https://images.pexels.com/photos/541216/pexels-photo-541216.jpeg"
+        }
+    };
+
+    private List<BookingModel> Bookings = new()
+    {
+        new() {
+            Id = "BK001",
+            EventId = 1,
+            CustomerName = "John Doe",
+            CustomerEmail = "john.doe@example.com",
+            CustomerAvatar = "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg",
+            BookingDate = DateTime.Now.AddDays(-2),
+            TicketCount = 2,
+            TotalAmount = "$198",
+            Status = "Confirmed"
+        },
+        new() {
+            Id = "BK002",
+            EventId = 2,
+            CustomerName = "Jane Smith",
+            CustomerEmail = "jane.smith@example.com",
+            CustomerAvatar = "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
+            BookingDate = DateTime.Now.AddDays(-1),
+            TicketCount = 1,
+            TotalAmount = "$149",
+            Status = "Pending"
+        },
+        new() {
+            Id = "BK003",
+            EventId = 3,
+            CustomerName = "Mike Johnson",
+            CustomerEmail = "mike.j@example.com",
+            CustomerAvatar = "https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg",
+            BookingDate = DateTime.Now.AddHours(-12),
+            TicketCount = 4,
+            TotalAmount = "$180",
+            Status = "Completed"
+        }
+    };
+
+    private IEnumerable<BookingModel> FilteredBookings =>
+        Bookings.Where(b =>
+            (string.IsNullOrEmpty(searchQuery) ||
+             b.CustomerName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+             b.CustomerEmail.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+             b.Id.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrEmpty(selectedStatus) ||
+             b.Status == selectedStatus) &&
+            (string.IsNullOrEmpty(selectedEvent) ||
+             b.EventId.ToString() == selectedEvent)
+        );
+
+    private void OpenCreateBookingModal()
+    {
+        newBooking = new BookingModel
+            {
+                EventId = Events.First().Id,
+                Status = "Pending",
+                BookingDate = DateTime.Now
+            };
+        showCreateModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showCreateModal = false;
+    }
+
+    private void HandleCreateBooking()
+    {
+        // Add validation and API call here
+        newBooking.Id = $"BK{Bookings.Count + 1:000}";
+        newBooking.CustomerAvatar = "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg";
+
+        var selectedEvent = Events.First(e => e.Id == newBooking.EventId);
+        newBooking.TotalAmount = $"${decimal.Parse(selectedEvent.Price.TrimStart('$')) * newBooking.TicketCount}";
+
+        Bookings.Add(newBooking);
+        showCreateModal = false;
+    }
+
+    private void ViewBooking(BookingModel booking)
+    {
+        // Implement view functionality
+    }
+
+    private void EditBooking(BookingModel booking)
+    {
+        // Implement edit functionality
+    }
+
+    private void CancelBooking(BookingModel booking)
+    {
+        // Implement cancel functionality with confirmation
+        booking.Status = "Cancelled";
+    }
+
+    private void ExportBookings()
+    {
+        // Implement CSV export functionality
+    }
+
+    private class EventModel
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public DateTime Date { get; set; }
+        public string Status { get; set; }
+        public string ImageUrl { get; set; }
+        public string Price { get; set; }
+    }
+
+    private class BookingModel
+    {
+        public string Id { get; set; }
+        public int EventId { get; set; }
+        public string CustomerName { get; set; }
+        public string CustomerEmail { get; set; }
+        public string CustomerAvatar { get; set; }
+        public DateTime BookingDate { get; set; }
+        public int TicketCount { get; set; }
+        public string TotalAmount { get; set; }
+        public string Status { get; set; }
+    }
+}
