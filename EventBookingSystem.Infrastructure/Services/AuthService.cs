@@ -1,5 +1,6 @@
 ﻿using EventBookingSystem.Core.DTOs.Auth;
 using EventBookingSystem.Core.Entities;
+using EventBookingSystem.Core.Interfaces.Repositories;
 using EventBookingSystem.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -12,34 +13,34 @@ namespace EventBookingSystem.Infrastructure.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly UserManager<ApplicationUser> _manager;
+        private readonly IUserRepository _userRepository;
         private readonly ILogger<AuthService> _logger;
         private readonly ITokenService _tokenService;
         private readonly IConfiguration _configuration;
-        public AuthService(UserManager<ApplicationUser> manager, ILogger<AuthService> logger, ITokenService tokenService, IConfiguration configuration)
+        public AuthService(ILogger<AuthService> logger, ITokenService tokenService, IConfiguration configuration, IUserRepository userRepository)
         {
-            this._manager = manager;
             this._logger = logger;
             this._tokenService = tokenService;
             this._configuration = configuration;
+            _userRepository = userRepository;
         }
 
         public async Task<AuthResponse> RegisterAsync(RegisterReq request)
         {
             try
             {
-                if (await _manager.FindByNameAsync(request.UserName) is not null)
+                if (await _userRepository.CheckUsernameExistsAsync(request.UserName))
                 {
                     return new AuthResponse { Error = "User Is already regiterd with same Email", Message = request.Email, Success = false };
                 }
 
-                if (await _manager.FindByNameAsync(request.UserName) is not null)
+                if (await _userRepository.CheckEmailExistsAsync(request.UserName))
                 {
                     return new AuthResponse { Error = "User Is already regiterd with same username", Message = request.UserName, Success = false };
                 }
 
                 var user = ApplicationUser.Create(request.UserName, request.Email, request.FirstName, request.LastName, request.Birthaday);
-                await _manager.CreateAsync(user, request.Password);
+                await _userRepository.AddUserAsync(user,request.Password);
 
 
                 return await GenerateAuthResponseAsync(user);
@@ -55,7 +56,7 @@ namespace EventBookingSystem.Infrastructure.Services
         {
             try
             {
-                var user = await _manager.FindByEmailAsync(request.Email);
+                var user = await _userRepository.GetUserByEmailAsync(request.Email);
                 if (user == null)
                 {
                     return new AuthResponse { Success = false, Error = "Invalid credentials" };
@@ -75,7 +76,7 @@ namespace EventBookingSystem.Infrastructure.Services
         {
             try
             {
-                var user = await _manager.FindByIdAsync(userId.ToString());
+                var user = await _userRepository.GetUserByIdAsync(userId);
                 if (user == null)
                 {
                     return new AuthResponse { Success = false, Error = "User not found" };
@@ -100,7 +101,7 @@ namespace EventBookingSystem.Infrastructure.Services
                 {
                     return new AuthResponse { Success = false, Error = "Invalid token" };
                 }
-                var user = await _manager.FindByIdAsync(userId);
+                var user = await _userRepository.GetUserByIdAsync(Guid.Parse(userId));
                 if (user == null)
                 {
                     return new AuthResponse { Success = false, Error = "User not found" };
@@ -118,39 +119,6 @@ namespace EventBookingSystem.Infrastructure.Services
                 return new AuthResponse { Success = false, Error = string.Join(", ", ex), Message = "Refresh token failed for user {UserId}" };
             }
         }
-
-        public async Task<bool> AddRoleAsync(string Username, string RoleName)
-        {
-            try
-            {
-                var user = await _manager.FindByNameAsync(Username);
-                if (user == null)
-                {
-                    _logger.LogWarning("User {Username} not found when adding role", Username);
-                    return false;
-                }
-                if (await _manager.IsInRoleAsync(user,RoleName))
-                {
-                    _logger.LogInformation("User {Username} already has role {Role}",Username,RoleName);
-                    return false;
-                }
-
-
-                await _manager.AddToRoleAsync(user, RoleName);
-                _logger.LogInformation($"role {RoleName} are added successfully to user {Username}", RoleName, Username);
-                return true;
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex,"Failed to add role {Role} to user {Username}",RoleName,Username);
-                return false;
-            }
-        }
-
-
-
-
 
         private async Task<AuthResponse> GenerateAuthResponseAsync(ApplicationUser user)
         {
