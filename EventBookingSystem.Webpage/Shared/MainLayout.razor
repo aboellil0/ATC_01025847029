@@ -1,12 +1,28 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 
-<div class="app-container">
+<div class="app-container w-100 min-vh-100">
     <Header />
-    
-    <main class="main-content">
+
+    <main class="main-content w-100">
         @Body
     </main>
-    
+
     <Footer />
 </div>
+
+<style>
+    .app-container {
+        display: flex;
+        flex-direction: column;
+        width: 100vw;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    .main-content {
+        flex: 1;
+        width: 100%;
+        max-width: 100%;
+    }
+</style>
