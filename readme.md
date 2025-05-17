@@ -327,9 +327,9 @@ erDiagram
 
 ### Main page
 
-![[Pasted image 20250517225301.png]]
-![[Pasted image 20250517225412.png]]
-![[Pasted image 20250517225429.png]]
+!(a)[Pasted image 20250517225301.png]
+!(a)[Pasted image 20250517225412.png]
+!(a)[Pasted image 20250517225429.png]
 
 
 ### Events Page
