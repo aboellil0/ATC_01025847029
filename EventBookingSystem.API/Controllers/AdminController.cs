@@ -7,6 +7,5 @@ namespace EventBookingSystem.Api.Controllers
     [ApiController]
     public class AdminController : ControllerBase
     {
-        public AdminController() { }
     }
 }
