@@ -1,6 +1,4 @@
-﻿
-
-## Folder Structure
+﻿# Event Booking System - Folder Structure
 
 ```
 EventBookingSystem/
@@ -112,7 +110,7 @@ EventBookingSystem/
     └── UserService.cs
 ```
 
-### Pages Structure
+## Pages Structure
 ```
 Pages/
 ├── Admin/
@@ -131,7 +129,7 @@ Pages/
 └── Signup.razor
 ```
 
-### Shared Components
+## Shared Components
 ```
 Shared/
 ├── AdminLayout.razor
@@ -141,38 +139,3 @@ Shared/
 ├── _Imports.razor
 └── App.razor
 ```
-
-
-## Controllers & Endpoints
-
-### 1. AuthController
-- **POST** `/api/auth/register` - Register a new user
-- **POST** `/api/auth/login` - Authenticate user and return token
-- **GET** `/api/auth/me` - Get current authenticated user
-
-### 2. EventController
-- **GET** `/api/events` - Get all events (with optional filtering)
-- **POST** `/api/events` - Create a new event (admin only)
-- **GET** `/api/events/:id` - Get event details by ID
-- **PUT** `/api/events/:id` - Update an event (admin only)
-- **DELETE** `/api/events/:id` - Delete an event (admin only)
-- **GET** `/api/events/categories` - Get all event categories
-
-### 3. BookingController
-- **GET** `/api/bookings` - Get all bookings for current user
-- **POST** `/api/bookings` - Create a new booking
-- **GET** `/api/bookings/:id` - Get booking details by ID
-- **PUT** `/api/bookings/:id` - Update booking status
-- **DELETE** `/api/bookings/:id` - Cancel booking
-- **GET** `/api/bookings/events/:eventId` - Check if user has booked event
-
-### 4. UserController
-- **GET** `/api/users` - Get all users (admin only)
-- **GET** `/api/users/:id` - Get user details by ID (admin or own profile)
-- **PUT** `/api/users/:id` - Update user profile (admin or own profile)
-- **DELETE** `/api/users/:id` - Delete user (admin only)
-
-### 5. AdminController
-- **GET** `/api/admin/dashboard` - Get admin dashboard statistics
-- **GET** `/api/admin/bookings` - Get all bookings (admin only)
-- **PUT** `/api/admin/bookings/:id` - Update any booking (admin only)
