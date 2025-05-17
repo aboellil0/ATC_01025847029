@@ -1,6 +1,10 @@
-﻿
 
-## Folder Structure
+
+#  EventsCandy
+
+## ⚠️⚠️ the backend is working very well the front has some issues but also have working things like Events page (countians search and filter by category and price)
+
+## 📂 Folder Structure
 
 ```
 EventBookingSystem/
@@ -143,7 +147,9 @@ Shared/
 ```
 
 
-## Controllers & Endpoints
+---
+
+## 🔗 Controllers & Endpoints
 
 ### 1. AuthController
 - **POST** `/api/auth/register` - Register a new user
@@ -176,3 +182,177 @@ Shared/
 - **GET** `/api/admin/dashboard` - Get admin dashboard statistics
 - **GET** `/api/admin/bookings` - Get all bookings (admin only)
 - **PUT** `/api/admin/bookings/:id` - Update any booking (admin only)
+
+
+---
+
+
+## 🎛️ User Roles & Access Control
+
+
+### User not registered
+
+![[Pasted image 20250517220107.png]]
+
+
+### Registered User
+
+![[Pasted image 20250517220125.png]]
+
+
+### Admin 
+
+![[Pasted image 20250517220147.png]]
+
+
+---
+
+## 🗺️ Page Structure map
+
+
+![[Pasted image 20250517220256.png]]
+
+![[Pasted image 20250517220310.png]]
+
+
+---
+
+## 📌 Build and run 
+
+To build and run your Event Booking System project, follow these comprehensive steps:
+
+First, make sure you have all the necessary prerequisites installed:
+
+- .NET 9 SDK
+- Visual Studio 2022 or VS Code with C# extensions
+- SQL Server (Express or Developer edition)
+- Git (if using version control)
+
+The database setup is straightforward - create a new database named "EventBookingSystem" and update the connection string in the appropriate configuration files.
+
+For applying migrations, use Entity Framework Core commands like:
+
+```
+dotnet ef database update
+```
+
+Building is simple with either Visual Studio (Ctrl+Shift+B) or via command line:
+
+```
+dotnet restore
+dotnet build
+```
+
+When running the project, you'll need to launch both the API and the Blazor web application. In Visual Studio, you can configure multiple startup projects to run them simultaneously.
+
+If you encounter issues, the guide includes troubleshooting tips for database connection problems, build errors, and runtime issues.
+
+Finally, when you're ready to deploy, you can publish both the API and web application with simple dotnet publish commands.
+
+
+---
+
+## 🧷 ERD 
+
+erDiagram
+    ApplicationUser ||--o{ RefreshToken : "has"
+    ApplicationUser ||--o{ Booking : "makes"
+    Event ||--o{ Booking : "has"
+    
+    ApplicationUser {
+        Guid Id PK
+        string UserName
+        string Email
+        string PhoneNumber
+        string PasswordHash
+        string FirstName
+        string LastName
+        DateTime DateOfBirth
+        DateTime CreatedAt
+        DateTime UpdatedAt
+        bool IsEmailVerified
+        bool IsPhoneVerified
+    }
+    
+    ApplicationRole {
+        Guid Id PK
+        string Name
+        string Description
+        DateTime CreatedAt
+    }
+    
+    RefreshToken {
+        Guid Id PK
+        Guid UserId FK
+        string Token
+        string CreatedByIp
+        string RevokedByIp
+        string ReblacedToken
+        DateTime CreatedAt
+        DateTime RevokedAt
+        DateTime ExpireDate
+        bool IsExpired
+        bool IsActive
+    }
+    
+    Booking {
+        Guid Id PK
+        Guid UserId FK
+        Guid EventId FK
+        DateTime BookingDate
+    }
+    
+    Event {
+        Guid Id PK
+        string Name
+        string Description
+        DateTime EventDate
+        string Venue
+        decimal Price
+        string ImageUrl
+        bool IsBooked
+        DateTime CreatedAt
+        EventCategory Category
+    }
+    
+    EventCategory {
+        int Value
+        string Name
+    }
+
+---
+
+# FrontEnd 
+
+
+### Main page
+
+![[Pasted image 20250517225301.png]]
+![[Pasted image 20250517225412.png]]
+![[Pasted image 20250517225429.png]]
+
+
+### Events Page
+
+![[Pasted image 20250517225519.png]]
+
+### Signup and Login 
+
+![[Pasted image 20250517225606.png]]
+![[Pasted image 20250517225624.png]]
+
+
+### Admin Dashboard 
+
+![[Pasted image 20250517225720.png]]
+
+![[Pasted image 20250517225742.png]]
+![[Pasted image 20250517225754.png]]
+![[Pasted image 20250517225807.png]]
+
+
+----
+
+
+##  🥲 I am sorry I didn't have enough time to make the project completely perfect it and put the final touches because of exams and competitions in college but the project is still very good and the Backend part is not 
+
