@@ -58,7 +58,7 @@ namespace EventBookingSystem.API.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost,Authorize(Roles ="Admin")]
         public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto eventCreateDto)
         {
             try
@@ -76,7 +76,7 @@ namespace EventBookingSystem.API.Controllers
             }
         }
 
-        [HttpPut("{id}"), Authorize]
+        [HttpPut("{id}"), Authorize(Roles ="Admin")]
         public async Task<IActionResult> UpdateEvent(Guid id, [FromBody] EventUpdateDto eventUpdateDto)
         {
             try
@@ -99,7 +99,7 @@ namespace EventBookingSystem.API.Controllers
             }
         }
 
-        [HttpDelete("{id}"), Authorize]
+        [HttpDelete("{id}"), Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteEvent(Guid id)
         {
             try

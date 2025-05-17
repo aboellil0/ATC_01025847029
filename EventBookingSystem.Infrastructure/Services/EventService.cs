@@ -4,7 +4,6 @@ using EventBookingSystem.Core.Entities;
 using EventBookingSystem.Core.Interfaces.Repositories;
 using EventBookingSystem.Core.Interfaces.Services;
 using EventBookingSystem.Infrastructure.Data;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -41,7 +40,8 @@ namespace EventBookingSystem.Infrastructure.Services
                 Category = e.Category,
                 CategoryName = Enum.GetName(typeof(EventCategory), e.Category),
                 FormattedEventDate = e.EventDate.ToString("dd/MM/yyyy"),
-                IsBooked = e.IsBooked
+                IsBooked = e.IsBooked,
+                CreatedAt = e.CreatedAt
             }).ToList();
 
             if (userId != null) {
@@ -76,7 +76,8 @@ namespace EventBookingSystem.Infrastructure.Services
                 Category = eventModel.Category,
                 CategoryName = Enum.GetName(typeof(EventCategory), eventModel.Category),
                 FormattedEventDate = eventModel.EventDate.ToString("dd/MM/yyyy"),
-                IsBooked = eventModel.IsBooked 
+                IsBooked = eventModel.IsBooked,
+                CreatedAt = eventModel.CreatedAt
             };
             if (userId != null)
             {
@@ -102,7 +103,8 @@ namespace EventBookingSystem.Infrastructure.Services
                 Category = e.Category,
                 CategoryName = Enum.GetName(typeof(EventCategory), e.Category),
                 FormattedEventDate = e.EventDate.ToString("dd/MM/yyyy"),
-                IsBooked = e.IsBooked
+                IsBooked = e.IsBooked,
+                CreatedAt = e.CreatedAt
             }).ToList();
 
             if (userId != null)
@@ -126,7 +128,8 @@ namespace EventBookingSystem.Infrastructure.Services
                 Venue = eventCreateDto.Venue,
                 Price = eventCreateDto.Price,
                 ImageUrl = eventCreateDto.ImageUrl,
-                Category = (EventCategory)eventCreateDto.Category
+                Category = (EventCategory)eventCreateDto.Category,
+                CreatedAt = DateTime.UtcNow
             };
             var createdEvent = await _eventRepository.CreateEventAsync(eventModel);
             _logger.LogInformation($"event has been created");
@@ -142,6 +145,7 @@ namespace EventBookingSystem.Infrastructure.Services
                 Category = createdEvent.Category,
                 CategoryName = Enum.GetName(typeof(EventCategory), createdEvent.Category),
                 FormattedEventDate = createdEvent.EventDate.ToString("dd/MM/yyyy"),
+                CreatedAt = createdEvent.CreatedAt,
                 IsBooked = false // Default value, will be updated when fetching the event
             };   
         }

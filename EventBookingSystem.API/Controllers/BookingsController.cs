@@ -18,7 +18,7 @@ namespace EventBookingSystem.API.Controllers
 
 
         [HttpGet("bookings")]
-        public async Task<IActionResult> GetUserBookings()
+        public async Task<ActionResult<BookingDto>> GetUserBookings()
         {
             try
             {
@@ -32,8 +32,8 @@ namespace EventBookingSystem.API.Controllers
             }
         }
 
-        [HttpPost("bookings")]
-        public async Task<IActionResult> CreateBooking([FromBody] BookingCreateDto bookingCreateDto)
+        [HttpPost("booking")]
+        public async Task<ActionResult<BookingDto>> CreateBooking([FromBody] BookingCreateDto bookingCreateDto)
         {
             try
             {
@@ -48,17 +48,13 @@ namespace EventBookingSystem.API.Controllers
         }
 
         [HttpDelete("bookings/{bookingId}")]
-        public async Task<IActionResult> CancelBooking(Guid bookingId)
+        public async Task<ActionResult<bool>> CancelBooking(Guid bookingId)
         {
             try
             {
                 Guid userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var result = await _bookingService.CancelBookingAsync(userId, bookingId);
-                if (result)
-                {
-                    return Ok("Booking cancelled successfully.");
-                }
-                return NotFound("Booking not found.");
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -67,7 +63,7 @@ namespace EventBookingSystem.API.Controllers
         }
 
         [HttpGet("bookings/check/{eventId}")]
-        public async Task<IActionResult> CheckBooking(Guid eventId)
+        public async Task<ActionResult<bool>> CheckBooking(Guid eventId)
         {
             try
             {

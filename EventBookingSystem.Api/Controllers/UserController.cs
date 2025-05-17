@@ -1,5 +1,6 @@
 ﻿using EventBookingSystem.Core.DTOs.Auth;
 using EventBookingSystem.Core.Interfaces.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,7 +15,8 @@ namespace EventBookingSystem.API.Controllers
         {
             _userRepository = userRepository;
         }
-        [HttpGet("Users")]
+
+        [HttpGet("Users"),Authorize(Roles = "Admin")]
         public async Task<ActionResult<IReadOnlyList<UserDto>>> getAllUsers()
         {
             var users = await _userRepository.GetAllUsersAsync();
@@ -39,10 +41,22 @@ namespace EventBookingSystem.API.Controllers
             return Ok(userDtos);
         }
 
-        [HttpGet("User/{userId}")]
+        [HttpGet("User/{userId}"), Authorize]
         public async Task<ActionResult<UserDto>> GetUserDitails(Guid userId)
         {
             var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Check if the user is accessing their own account
+            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (currentUserId != userId.ToString() && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             var userRoles = await _userRepository.GetUserRolesAsync(user.Id);
             return Ok(new UserDto
             {
@@ -58,10 +72,23 @@ namespace EventBookingSystem.API.Controllers
                 IsPhoneVerified = user.IsPhoneVerified
             });
         }
-        [HttpPut("User/{userId}")]
+
+        [HttpPut("User/{userId}"), Authorize]
         public async Task<ActionResult<UserDto>> UpdateUser(Guid userId, [FromBody] UpdateUserReq updateUserDto)
         {
             var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Check if the user is accessing their own account
+            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (currentUserId != userId.ToString() && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             if (user == null)
             {
                 return null;
@@ -82,7 +109,7 @@ namespace EventBookingSystem.API.Controllers
             };
         }
 
-        [HttpDelete("User/{userId}")]
+        [HttpDelete("User/{userId}"), Authorize(Roles = "Admin")]
         public async Task<ActionResult<bool>> DeleteUser(Guid userId)
         {
             var user = await _userRepository.GetUserByIdAsync(userId);

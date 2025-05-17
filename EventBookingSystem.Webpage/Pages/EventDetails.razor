@@ -1,4 +1,8 @@
-﻿@page "/events/{Id:int}/book"
+﻿@page "/events/{Id:Guid}/book"
+@using EventBookingSystem.Core.DTOs.Events
+@using EventBookingSystem.Webpage.Services
+@inject EventService EventService
+
 @inject NavigationManager NavigationManager
 
 <div class="event-details-container">
@@ -136,39 +140,37 @@
 
 @code {
     [Parameter]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     private EventDetailsModel selectedEvent;
+    private EventDto wantedEvent;
     private int ticketCount = 1;
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         // Simulated event data
-        selectedEvent = new EventDetailsModel
+        wantedEvent = await EventService.GetEvent(Id);
+        selectedEvent = new EventDetailsModel()
             {
-                Id = Id,
-                Title = "Summer Music Festival",
-                Location = "Central Park",
-                Address = "Central Park, New York, NY 10022",
-                Date = DateTime.Parse("2024-06-28"),
-                Time = "4:00 PM - 11:00 PM",
-                Price = "$99.00",
-                ImageUrl = "https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg",
-                CategoryId = 1,
-                IsFeatured = true,
-                Description = "Join us for an unforgettable summer evening filled with live music, great food, and amazing atmosphere. Featuring top artists from around the world, this festival promises to be the highlight of your summer!",
-                Organizer = "EventsCandy Productions",
-                TicketsLeft = 156,
-                SoldCount = 844,
+                Id = wantedEvent.Id,
+                Title = wantedEvent.Name,
+                Location = wantedEvent.Venue,
+                Address = wantedEvent.Venue,
+                Date = wantedEvent.EventDate,
+                Price = wantedEvent.Price,
+                ImageUrl = wantedEvent.ImageUrl,
+                CategoryId = (int)wantedEvent.Category,
+                IsFeatured = wantedEvent.CreatedAt <= DateTime.UtcNow.AddDays(5),
+                Description = wantedEvent.Description,
+                Organizer = "Aboellil",
+                TicketsLeft = 12,
+                SoldCount = 5,
                 Amenities = new List<AmenityModel>
-            {
-                new() { Icon = "🎵", Name = "Live Music" },
-                new() { Icon = "🍔", Name = "Food Vendors" },
-                new() { Icon = "🚗", Name = "Parking Available" },
-                new() { Icon = "🌧️", Name = "Weather Protection" },
-                new() { Icon = "♿", Name = "Wheelchair Accessible" },
-                new() { Icon = "🚻", Name = "Restrooms" }
-            }
+                {
+                new AmenityModel { Icon = "WiFi", Name = "Free WiFi" },
+                new AmenityModel { Icon = "Parking", Name = "Parking Available" },
+                new AmenityModel { Icon = "Food", Name = "Food & Drinks" }
+                }
             };
     }
 
@@ -201,7 +203,7 @@
 
     private decimal GetSubtotal()
     {
-        var price = decimal.Parse(selectedEvent.Price.TrimStart('$'));
+        var price = selectedEvent.Price;
         return price * ticketCount;
     }
 
@@ -227,13 +229,13 @@
 
     private class EventDetailsModel
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Title { get; set; }
         public string Location { get; set; }
         public string Address { get; set; }
         public DateTime Date { get; set; }
         public string Time { get; set; }
-        public string Price { get; set; }
+        public decimal Price { get; set; }
         public string ImageUrl { get; set; }
         public int CategoryId { get; set; }
         public bool IsFeatured { get; set; }

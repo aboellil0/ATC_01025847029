@@ -60,7 +60,7 @@ namespace EventBookingSystem.Infrastructure.Services
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("Jwt:AccessTokenExpirationMinutes", 15)),
+                expires: DateTime.UtcNow.AddMinutes(int.Parse(_configuration.GetSection("Jwt:AccessTokenExpirationMinutes").Value ?? "15")),
                 signingCredentials: credentials
             );
 

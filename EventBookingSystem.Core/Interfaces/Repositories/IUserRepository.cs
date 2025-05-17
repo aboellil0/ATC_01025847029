@@ -14,12 +14,13 @@ namespace EventBookingSystem.Core.Interfaces.Repositories
         Task<bool> CheckEmailExistsAsync(string email);
         Task<bool> CheckUsernameExistsAsync(string username);
         Task<ApplicationUser> GetUserByIdAsync(Guid userId);
-        Task AddUserAsync(ApplicationUser user, string pass);
+        Task<ApplicationUser> AddUserAsync(ApplicationUser user, string pass);
         Task UpdateUserAsync(ApplicationUser user);
         Task DeleteUserAsync(ApplicationUser user);
         Task<List<ApplicationUser>> GetAllUsersAsync();
         Task<IReadOnlyList<string>> GetUserRolesAsync(Guid userId);
         Task<bool> AssignRoleToUserAsync(Guid userId, string roleName);
+        Task<ApplicationUser> AddAdminAsync(ApplicationUser user, string pass);
 
     }
 }

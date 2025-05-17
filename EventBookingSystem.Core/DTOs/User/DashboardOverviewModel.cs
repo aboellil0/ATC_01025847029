@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EventBookingSystem.Core.DTOs.User
 {
-    public class DashboardOverview
+    public class DashboardOverviewModel
     {
         public int totalUsers { get; set; }
         public int totalEvents { get; set; }

@@ -19,6 +19,7 @@ namespace EventBookingSystem.Core.DTOs.Events
         public string Venue { get; set; }
         public decimal Price { get; set; }
         public string ImageUrl { get; set; }
+        public DateTime CreatedAt { get; set; }
         public bool IsBooked { get; set; } = false; // Used to determine if current user has booked this event
     }
 }

@@ -42,11 +42,42 @@ namespace EventBookingSystem.Infrastructure.Repositories
             return await _context.Users.AnyAsync(u => u.UserName == username);
         }
 
-        public async Task AddUserAsync(ApplicationUser user, string pass)
+        public async Task<ApplicationUser> AddUserAsync(ApplicationUser user, string pass)
         {
-            await _manager.CreateAsync(user,pass);
-            await _manager.AddToRoleAsync(user, "User");
+            var result = await _manager.CreateAsync(user, pass);
+            if (!result.Succeeded)
+            {
+                throw new Exception($"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
 
+            // IMPORTANT: The user must be saved to the database BEFORE adding to role
+            // Add to role after successful user creation
+            var roleResult = await _manager.AddToRoleAsync(user, "User"); // Or whatever role you're using
+            if (!roleResult.Succeeded)
+            {
+                // Handle role assignment failure
+                throw new Exception($"User created but role assignment failed: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+            }
+            return user; 
+        }
+
+        public async Task<ApplicationUser> AddAdminAsync(ApplicationUser user, string pass)
+        {
+            var result = await _manager.CreateAsync(user, pass);
+            if (!result.Succeeded)
+            {
+                throw new Exception($"Failed to create Admin: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
+
+            // IMPORTANT: The user must be saved to the database BEFORE adding to role
+            // Add to role after successful user creation
+            var roleResult = await _manager.AddToRoleAsync(user, "Admin"); // Or whatever role you're using
+            if (!roleResult.Succeeded)
+            {
+                // Handle role assignment failure
+                throw new Exception($"Admin created but role assignment failed: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+            }
+            return user;
         }
 
         public async Task UpdateUserAsync(ApplicationUser user)

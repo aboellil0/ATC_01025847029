@@ -1,11 +1,15 @@
 ﻿@page "/signup"
+@using System.ComponentModel.DataAnnotations
+@using EventBookingSystem.Core.DTOs.Auth
+@using EventBookingSystem.Webpage.Services
+@inject IClientAuthService AuthService
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
 
-<div class="auth-container">
+<div class="auth-container m-auto">
     <div class="auth-card">
         <div class="auth-header">
-            <h2>Sign up for TicketsCandy</h2>
+            <h2>Sign up for EventCandy</h2>
             <p>Create your account to get started</p>
         </div>
 
@@ -40,15 +44,21 @@
             </div>
 
             <div class="form-group">
+                <label for="birthday">Birthday</label>
+                <InputDate id="birthday" class="form-control" @bind-Value="registerModel.Birthdate" />
+                <ValidationMessage For="@(() => registerModel.Birthdate)" />
+            </div>
+
+            <div class="form-group">
                 <label for="password">Password</label>
                 <InputText id="password" type="password" class="form-control" @bind-Value="registerModel.Password" />
                 <ValidationMessage For="@(() => registerModel.Password)" />
             </div>
 
             <div class="form-group">
-                <label for="birthday">Birthday</label>
-                <InputDate id="birthday" class="form-control" @bind-Value="registerModel.BirthdayDateTime" />
-                <ValidationMessage For="@(() => registerModel.Birthaday)" />
+                <label for="confirmPassword">Confirm Password</label>
+                <InputText id="confirmPassword" type="password" class="form-control" @bind-Value="registerModel.ConfirmPassword" />
+                <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
             </div>
 
             <div class="form-options d-flex flex-column">
@@ -63,7 +73,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="auth-button login-button" disabled="@(!acceptedTerms)">
+            <button type="submit" class="auth-button login-button" disabled="@(isLoading||!acceptedTerms)">
                 Create Account
             </button>
         </EditForm>
@@ -80,35 +90,82 @@
 </div>
 
 @code {
-    private RegisterModel registerModel = new();
+    private RegisterViewModel registerModel = new();
     private bool acceptedTerms;
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
 
-    private class RegisterModel
+    public class RegisterViewModel
     {
-        public string UserName { get; set; }
-        public string Password { get; set; }
-        public string Email { get; set; }
+        [Required(ErrorMessage = "First name is required")]
+        [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters")]
         public string FirstName { get; set; }
-        public string LastName { get; set; } = string.Empty;
-        public DateTime BirthdayDateTime { get; set; } = DateTime.Today;
-        public DateOnly Birthaday => DateOnly.FromDateTime(BirthdayDateTime);
+
+        [Required(ErrorMessage = "Last name is required")]
+        [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters")]
+        public string LastName { get; set; }
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Username is required")]
+        [StringLength(50, ErrorMessage = "Username cannot exceed 50 characters")]
+        public string UserName { get; set; }
+
+        [Required(ErrorMessage = "Birthdate is required")]
+        public DateOnly Birthdate { get; set; } = new DateOnly(2000, 1, 1);
+
+        [Required(ErrorMessage = "Password is required")]
+        public string Password { get; set; }
+
+        [Required(ErrorMessage = "Confirm Password is required")]
+        [Compare(nameof(Password), ErrorMessage = "Passwords do not match")]
+        public string ConfirmPassword { get; set; }
     }
 
     private async Task HandleSignup()
     {
-        if (!acceptedTerms) return;
+        errorMessage = string.Empty;
+        isLoading = true;
+
+        if (registerModel.Password != registerModel.ConfirmPassword)
+        {
+            errorMessage = "Passwords do not match";
+            isLoading = false;
+            return;
+        }
 
         try
         {
-            var response = await Http.PostAsJsonAsync("api/auth/register", registerModel);
-            if (response.IsSuccessStatusCode)
+            var registerRequest = new RegisterReq
+                {
+                    UserName = registerModel.UserName,
+                    Email = registerModel.Email,
+                    FirstName = registerModel.FirstName,
+                    LastName = registerModel.LastName,
+                    Birthaday = registerModel.Birthdate,
+                    Password = registerModel.Password
+                };
+
+            var result = await AuthService.RegisterAsync(registerRequest);
+
+            if (result.Success)
             {
-                NavigationManager.NavigateTo("/login");
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                errorMessage = result.Error ?? "Registration failed. Please try again.";
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Handle error
+            errorMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 

@@ -1,0 +1,42 @@
+﻿@inject NavigationManager NavigationManager
+
+<header class="header px-md-4">
+    <div class="logo">
+        <img src="images/ticket-icon.svg" alt="Ticket Icon" />
+        <span class="logo-text">Events<span class="candy">Candy</span></span>
+    </div>
+    <nav class="navigation">
+        <ul>
+            <li><a href="/" class="@GetNavLinkClass("/")">Home</a></li>
+            <li><a href="/events" class="@GetNavLinkClass("/events")">Events</a></li>
+            <li><a href="/venues" class="@GetNavLinkClass("/venues")">Venues</a></li>
+            <li><a href="/support" class="@GetNavLinkClass("/support")">Support</a></li>
+        </ul>
+    </nav>
+    <div class="auth-buttons">
+        <button class="btn btn-login" @onclick="NavigateToLogin">Log In</button>
+        <button class="btn btn-signup" @onclick="NavigateToSignup">Sign up</button>
+    </div>
+</header>
+
+@code {
+    private void NavigateToLogin()
+    {
+        NavigationManager.NavigateTo("/login");
+    }
+
+    private void NavigateToSignup()
+    {
+        NavigationManager.NavigateTo("/signup");
+    }
+
+    private string GetNavLinkClass(string href)
+    {
+        var currentUrl = NavigationManager.Uri.ToLower();
+        if (href == "/" && currentUrl.EndsWith(NavigationManager.BaseUri.ToLower()))
+            return "active";
+        else if (href != "/" && currentUrl.Contains(href.ToLower()))
+            return "active";
+        return "";
+    }
+}

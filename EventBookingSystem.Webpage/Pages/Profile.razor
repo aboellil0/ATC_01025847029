@@ -1,491 +1,264 @@
-﻿@* @page "/profile" *@
-@* @inject NavigationManager NavigationManager *@
-@* @inject HttpClient Http *@
-@* @using System.Net.Http.Json *@
-@* @using System.Text.Json *@
-@* @implements IDisposable *@
+﻿@page "/profile"
+@inject NavigationManager NavigationManager
 
-@* <div class="profile-container"> *@
-@*     <div class="profile-header"> *@
-@*         <div class="profile-cover"></div> *@
-@*         <div class="profile-avatar-container"> *@
-@*             @if (string.IsNullOrEmpty(user?.ProfilePicture)) *@
-@*             { *@
-@*                 <div class="profile-avatar profile-avatar-placeholder"> *@
-@*                     @if (!string.IsNullOrEmpty(user?.FirstName) && !string.IsNullOrEmpty(user?.LastName)) *@
-@*                     { *@
-@*                         @(user.FirstName[0].ToString() + user.LastName[0].ToString()) *@
-@*                     } *@
-@*                 </div> *@
-@*             } *@
-@*             else *@
-@*             { *@
-@*                 <img src="@user?.ProfilePicture" alt="Profile" class="profile-avatar" /> *@
-@*             } *@
-@*         </div> *@
-@*         <div class="profile-user-info"> *@
-@*             <h1>@($"{user?.FirstName} {user?.LastName}")</h1> *@
-@*             <p>@user?.Email</p> *@
-@*         </div> *@
-@*     </div> *@
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-info">
+            <div class="profile-avatar">
+                <img src="@currentUser.Avatar" alt="@currentUser.Name" />
+                <button class="edit-avatar-btn" @onclick="ChangeAvatar">
+                    📷
+                </button>
+            </div>
+            <div class="profile-details">
+                <h1>@currentUser.Name</h1>
+                <p>@currentUser.Email</p>
+                <p>Member since @currentUser.JoinDate.ToString("MMMM yyyy")</p>
+            </div>
+        </div>
+    </div>
 
-@*     <div class="profile-tabs"> *@
-@*         <button class="tab-button @(activeTab == "profile" ? "active" : "")" @onclick="() => SetActiveTab("profile")"> *@
-@*             <i class="bi bi-person"></i> Profile Information *@
-@*         </button> *@
-@*         <button class="tab-button @(activeTab == "bookings" ? "active" : "")" @onclick="() => SetActiveTab("bookings")"> *@
-@*             <i class="bi bi-ticket-perforated"></i> My Bookings *@
-@*         </button> *@
-@*     </div> *@
+    <div class="profile-content">
+        <div class="profile-tabs">
+            <button class="tab-btn @(activeTab == "info" ? "active" : "")"
+                    @onclick='() => activeTab = "info"'>
+                Personal Information
+            </button>
+            <button class="tab-btn @(activeTab == "bookings" ? "active" : "")"
+                    @onclick='() => activeTab = "bookings"'>
+                My Bookings
+            </button>
+        </div>
 
-@*     <div class="profile-content"> *@
-@*         @if (activeTab == "profile") *@
-@*         { *@
-@*             <div class="profile-section fade-in"> *@
-@*                 <div class="profile-card"> *@
-@*                     <div class="card-header"> *@
-@*                         <h3>Profile Information</h3> *@
-@*                         <button class="edit-button" @onclick="ToggleEditMode"> *@
-@*                             @if (isEditing) *@
-@*                             { *@
-@*                                 <span>Cancel</span> *@
-@*                             } *@
-@*                             else *@
-@*                             { *@
-@*                                 <span><i class="bi bi-pencil"></i> Edit</span> *@
-@*                             } *@
-@*                         </button> *@
-@*                     </div> *@
+        @if (activeTab == "info")
+        {
+            <div class="profile-section">
+                <div class="section-header">
+                    <h2>Personal Information</h2>
+                    <button class="edit-btn" @onclick="() => isEditing = true">
+                        Edit Profile
+                    </button>
+                </div>
 
-@*                     @if (isEditing) *@
-@*                     { *@
-@*                         <EditForm Model="@editModel" OnValidSubmit="HandleProfileUpdate"> *@
-@*                             <DataAnnotationsValidator /> *@
-@*                             <ValidationSummary /> *@
-                            
-@*                             <div class="form-row"> *@
-@*                                 <div class="form-group"> *@
-@*                                     <label for="firstName">First Name</label> *@
-@*                                     <InputText id="firstName" class="form-control" @bind-Value="editModel.FirstName" /> *@
-@*                                     <ValidationMessage For="@(() => editModel.FirstName)" /> *@
-@*                                 </div> *@
-                                
-@*                                 <div class="form-group"> *@
-@*                                     <label for="lastName">Last Name</label> *@
-@*                                     <InputText id="lastName" class="form-control" @bind-Value="editModel.LastName" /> *@
-@*                                     <ValidationMessage For="@(() => editModel.LastName)" /> *@
-@*                                 </div> *@
-@*                             </div> *@
-                            
-@*                             <div class="form-group"> *@
-@*                                 <label for="email">Email</label> *@
-@*                                 <InputText id="email" type="email" class="form-control" @bind-Value="editModel.Email" /> *@
-@*                                 <ValidationMessage For="@(() => editModel.Email)" /> *@
-@*                             </div> *@
-                            
-@*                             <div class="form-group"> *@
-@*                                 <label for="username">Username</label> *@
-@*                                 <InputText id="username" class="form-control" @bind-Value="editModel.UserName" /> *@
-@*                                 <ValidationMessage For="@(() => editModel.UserName)" /> *@
-@*                             </div> *@
-                            
-@*                             <div class="form-group"> *@
-@*                                 <label for="birthday">Birthday</label> *@
-@*                                 <InputDate id="birthday" class="form-control" @bind-Value="editModel.BirthdayDateTime" /> *@
-@*                                 <ValidationMessage For="@(() => editModel.Birthday)" /> *@
-@*                             </div> *@
-                            
-@*                             <div class="form-group"> *@
-@*                                 <label for="phone">Phone Number</label> *@
-@*                                 <InputText id="phone" class="form-control" @bind-Value="editModel.PhoneNumber" /> *@
-@*                                 <ValidationMessage For="@(() => editModel.PhoneNumber)" /> *@
-@*                             </div> *@
-                            
-@*                             <button type="submit" class="auth-button login-button"> *@
-@*                                 Save Changes *@
-@*                             </button> *@
-@*                         </EditForm> *@
-@*                     } *@
-@*                     else *@
-@*                     { *@
-@*                         <div class="profile-details"> *@
-@*                             <div class="detail-item"> *@
-@*                                 <span class="detail-label">Username</span> *@
-@*                                 <span class="detail-value">@user?.UserName</span> *@
-@*                             </div> *@
-@*                             <div class="detail-item"> *@
-@*                                 <span class="detail-label">Full Name</span> *@
-@*                                 <span class="detail-value">@($"{user?.FirstName} {user?.LastName}")</span> *@
-@*                             </div> *@
-@*                             <div class="detail-item"> *@
-@*                                 <span class="detail-label">Email</span> *@
-@*                                 <span class="detail-value">@user?.Email</span> *@
-@*                             </div> *@
-@*                             <div class="detail-item"> *@
-@*                                 <span class="detail-label">Birthday</span> *@
-@*                                 <span class="detail-value">@(user?.Birthday.HasValue ? user.Birthday.Value.ToString("MMMM d, yyyy") : "Not provided")</span> *@
-@*                             </div> *@
-@*                             <div class="detail-item"> *@
-@*                                 <span class="detail-label">Phone Number</span> *@
-@*                                 <span class="detail-value">@(string.IsNullOrEmpty(user?.PhoneNumber) ? "Not provided" : user.PhoneNumber)</span> *@
-@*                             </div> *@
-@*                             <div class="detail-item"> *@
-@*                                 <span class="detail-label">Member Since</span> *@
-@*                                 <span class="detail-value">@(user?.CreatedAt.ToString("MMMM yyyy"))</span> *@
-@*                             </div> *@
-@*                         </div> *@
-@*                     } *@
-@*                 </div> *@
-@*             </div> *@
-@*         } *@
-@*         else if (activeTab == "bookings") *@
-@*         { *@
-@*             <div class="bookings-section fade-in"> *@
-@*                 <div class="bookings-filter"> *@
-@*                     <button class="filter-button @(bookingFilter == "upcoming" ? "active" : "")" @onclick="() => FilterBookings("upcoming")"> *@
-@*                         Upcoming *@
-@*                     </button> *@
-@*                     <button class="filter-button @(bookingFilter == "past" ? "active" : "")" @onclick="() => FilterBookings("past")"> *@
-@*                         Past *@
-@*                     </button> *@
-@*                     <button class="filter-button @(bookingFilter == "all" ? "active" : "")" @onclick="() => FilterBookings("all")"> *@
-@*                         All *@
-@*                     </button> *@
-@*                 </div> *@
+                @if (isEditing)
+                {
+                    <EditForm Model="@editUser" OnValidSubmit="HandleProfileUpdate">
+                        <DataAnnotationsValidator />
 
-@*                 @if (isLoading) *@
-@*                 { *@
-@*                     <div class="loading-spinner"> *@
-@*                         <div class="spinner-border text-primary" role="status"> *@
-@*                             <span class="visually-hidden">Loading...</span> *@
-@*                         </div> *@
-@*                     </div> *@
-@*                 } *@
-@*                 else if (filteredBookings.Count == 0) *@
-@*                 { *@
-@*                     <div class="no-bookings"> *@
-@*                         <i class="bi bi-calendar-x empty-icon"></i> *@
-@*                         <h3>No bookings found</h3> *@
-@*                         <p>You don't have any @bookingFilter bookings yet.</p> *@
-@*                         <a href="/events" class="browse-events-btn">Browse Events</a> *@
-@*                     </div> *@
-@*                 } *@
-@*                 else *@
-@*                 { *@
-@*                     <div class="bookings-list"> *@
-@*                         @foreach (var booking in filteredBookings) *@
-@*                         { *@
-@*                             <div class="booking-card @(booking.IsCancelled ? "cancelled" : "")"> *@
-@*                                 <div class="booking-image"> *@
-@*                                     <img src="@booking.EventImage" alt="@booking.EventName" /> *@
-@*                                     <div class="booking-status @GetStatusClass(booking)"> *@
-@*                                         @GetStatusText(booking) *@
-@*                                     </div> *@
-@*                                 </div> *@
-@*                                 <div class="booking-details"> *@
-@*                                     <h3 class="booking-title">@booking.EventName</h3> *@
-@*                                     <div class="booking-info"> *@
-@*                                         <div class="info-item"> *@
-@*                                             <i class="bi bi-calendar-event"></i> *@
-@*                                             <span>@booking.EventDate.ToString("MMM dd, yyyy")</span> *@
-@*                                         </div> *@
-@*                                         <div class="info-item"> *@
-@*                                             <i class="bi bi-clock"></i> *@
-@*                                             <span>@booking.EventTime</span> *@
-@*                                         </div> *@
-@*                                         <div class="info-item"> *@
-@*                                             <i class="bi bi-geo-alt"></i> *@
-@*                                             <span>@booking.Location</span> *@
-@*                                         </div> *@
-@*                                     </div> *@
-@*                                     <div class="booking-tickets"> *@
-@*                                         <i class="bi bi-ticket-perforated"></i> *@
-@*                                         <span>@booking.TicketQuantity ticket@(booking.TicketQuantity > 1 ? "s" : "")</span> *@
-@*                                         <span class="ticket-type">(@booking.TicketType)</span> *@
-@*                                     </div> *@
-@*                                 </div> *@
-@*                                 <div class="booking-actions"> *@
-@*                                     <button class="view-details-btn" @onclick="() => ViewBookingDetails(booking.Id)"> *@
-@*                                         <i class="bi bi-eye"></i> View Details *@
-@*                                     </button> *@
-@*                                     @if (!booking.IsPast && !booking.IsCancelled) *@
-@*                                     { *@
-@*                                         <button class="edit-booking-btn" @onclick="() => EditBooking(booking.Id)"> *@
-@*                                             <i class="bi bi-pencil"></i> Edit *@
-@*                                         </button> *@
-@*                                         <button class="cancel-booking-btn" @onclick="() => ConfirmCancelBooking(booking.Id)"> *@
-@*                                             <i class="bi bi-x-circle"></i> Cancel *@
-@*                                         </button> *@
-@*                                     } *@
-@*                                 </div> *@
-@*                             </div> *@
-@*                         } *@
-@*                     </div> *@
-@*                 } *@
-@*             </div> *@
-@*         } *@
-@*     </div> *@
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <InputText @bind-Value="editUser.Name" class="form-control" />
+                            <ValidationMessage For="@(() => editUser.Name)" />
+                        </div>
 
-@*     @if (showCancelConfirm) *@
-@*     { *@
-@*         <div class="modal-backdrop" @onclick="CancelConfirmation"></div> *@
-@*         <div class="modal-dialog"> *@
-@*             <div class="modal-content"> *@
-@*                 <div class="modal-header"> *@
-@*                     <h5 class="modal-title">Confirm Cancellation</h5> *@
-@*                     <button type="button" class="btn-close" @onclick="CancelConfirmation"></button> *@
-@*                 </div> *@
-@*                 <div class="modal-body"> *@
-@*                     <p>Are you sure you want to cancel this booking? This action cannot be undone.</p> *@
-@*                     <p class="text-warning"><i class="bi bi-exclamation-triangle"></i> Cancellation policies may apply.</p> *@
-@*                 </div> *@
-@*                 <div class="modal-footer"> *@
-@*                     <button type="button" class="btn btn-secondary" @onclick="CancelConfirmation">No, Keep Booking</button> *@
-@*                     <button type="button" class="btn btn-danger" @onclick="ConfirmCancel">Yes, Cancel Booking</button> *@
-@*                 </div> *@
-@*             </div> *@
-@*         </div> *@
-@*     } *@
-@* </div> *@
+                        <div class="form-group">
+                            <label>Email</label>
+                            <InputText @bind-Value="editUser.Email" class="form-control" />
+                            <ValidationMessage For="@(() => editUser.Email)" />
+                        </div>
 
-@* @code { *@
-@*     private User user; *@
-@*     private UserEditModel editModel = new(); *@
-@*     private List<UserBooking> bookings = new(); *@
-@*     private List<UserBooking> filteredBookings = new(); *@
-@*     private string activeTab = "profile"; *@
-@*     private bool isEditing = false; *@
-@*     private bool isLoading = true; *@
-@*     private string bookingFilter = "upcoming"; *@
-@*     private bool showCancelConfirm = false; *@
-@*     private int bookingToCancel; *@
-@*     private System.Threading.CancellationTokenSource cts = new(); *@
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <InputText @bind-Value="editUser.Phone" class="form-control" />
+                            <ValidationMessage For="@(() => editUser.Phone)" />
+                        </div>
 
-@*     protected override async Task OnInitializedAsync() *@
-@*     { *@
-@*         try *@
-@*         { *@
-@*             await LoadUserData(); *@
-@*             await LoadBookings(); *@
-@*             isLoading = false; *@
-@*         } *@
-@*         catch (Exception) *@
-@*         { *@
-@*             // Handle error *@
-@*             isLoading = false; *@
-@*         } *@
-@*     } *@
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" @onclick="CancelEdit">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                Save Changes
+                            </button>
+                        </div>
+                    </EditForm>
+                }
+                else
+                {
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Full Name</span>
+                            <span class="info-value">@currentUser.Name</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Email</span>
+                            <span class="info-value">@currentUser.Email</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value">@currentUser.Phone</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="profile-section">
+                <h2>My Bookings</h2>
 
-@*     private async Task LoadUserData() *@
-@*     { *@
-@*         try *@
-@*         { *@
-@*             user = await Http.GetFromJsonAsync<User>("api/users/profile"); *@
-            
-@*             // Initialize edit model with user data *@
-@*             if (user != null) *@
-@*             { *@
-@*                 editModel = new UserEditModel *@
-@*                 { *@
-@*                     FirstName = user.FirstName, *@
-@*                     LastName = user.LastName, *@
-@*                     Email = user.Email, *@
-@*                     UserName = user.UserName, *@
-@*                     BirthdayDateTime = user.Birthday.HasValue ? user.Birthday.Value.ToDateTime(TimeOnly.MinValue) : DateTime.Today, *@
-@*                     PhoneNumber = user.PhoneNumber *@
-@*                 }; *@
-@*             } *@
-@*         } *@
-@*         catch (Exception) *@
-@*         { *@
-@*             // Handle error *@
-@*         } *@
-@*     } *@
+                @if (userBookings.Any())
+                {
+                    <div class="bookings-grid">
+                        @foreach (var booking in userBookings)
+                        {
+                            <div class="booking-card">
+                                <div class="booking-image">
+                                    <img src="@booking.EventImage" alt="@booking.EventTitle" />
+                                </div>
+                                <div class="booking-info">
+                                    <h3>@booking.EventTitle</h3>
+                                    <p class="booking-date">@booking.EventDate.ToString("dddd, MMMM d, yyyy")</p>
+                                    <p class="booking-details">
+                                        <span class="ticket-count">@booking.TicketCount tickets</span>
+                                        <span class="booking-price">@booking.TotalAmount</span>
+                                    </p>
+                                    <div class="booking-status">
+                                        <span class="status-badge @booking.Status.ToLower()">
+                                            @booking.Status
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="booking-actions">
+                                    <button class="btn btn-view" @onclick="() => ViewBooking(booking)">
+                                        View Details
+                                    </button>
+                                    @if (booking.Status != "Cancelled" && booking.Status != "Completed")
+                                    {
+                                        <button class="btn btn-cancel" @onclick="() => CancelBooking(booking)">
+                                            Cancel Booking
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="no-bookings">
+                        <p>You haven't made any bookings yet.</p>
+                        <button class="btn btn-primary" @onclick="ExploreEvents">
+                            Explore Events
+                        </button>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
 
-@*     private async Task LoadBookings() *@
-@*     { *@
-@*         try *@
-@*         { *@
-@*             isLoading = true; *@
-@*             bookings = await Http.GetFromJsonAsync<List<UserBooking>>("api/bookings/user"); *@
-@*             FilterBookings(bookingFilter); *@
-@*             isLoading = false; *@
-@*         } *@
-@*         catch (Exception) *@
-@*         { *@
-@*             // Handle error *@
-@*             isLoading = false; *@
-@*         } *@
-@*     } *@
+@code {
+    private string activeTab = "info";
+    private bool isEditing = false;
+    private UserModel currentUser = new();
+    private UserModel editUser = new();
+    private List<BookingModel> userBookings = new();
 
-@*     private void SetActiveTab(string tab) *@
-@*     { *@
-@*         activeTab = tab; *@
-@*     } *@
+    protected override void OnInitialized()
+    {
+        // Simulated user data
+        currentUser = new UserModel
+            {
+                Name = "John Doe",
+                Email = "john.doe@example.com",
+                Phone = "+1 234 567 8900",
+                Avatar = "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg",
+                JoinDate = DateTime.Now.AddYears(-2)
+            };
 
-@*     private void ToggleEditMode() *@
-@*     { *@
-@*         isEditing = !isEditing; *@
-        
-@*         // Reset edit model if canceling *@
-@*         if (!isEditing) *@
-@*         { *@
-@*             editModel = new UserEditModel *@
-@*             { *@
-@*                 FirstName = user.FirstName, *@
-@*                 LastName = user.LastName, *@
-@*                 Email = user.Email, *@
-@*                 UserName = user.UserName, *@
-@*                 BirthdayDateTime = user.Birthday.HasValue ? user.Birthday.Value.ToDateTime(TimeOnly.MinValue) : DateTime.Today, *@
-@*                 PhoneNumber = user.PhoneNumber *@
-@*             }; *@
-@*         } *@
-@*     } *@
+        editUser = new UserModel
+            {
+                Name = currentUser.Name,
+                Email = currentUser.Email,
+                Phone = currentUser.Phone
+            };
 
-@*     private async Task HandleProfileUpdate() *@
-@*     { *@
-@*         try *@
-@*         { *@
-@*             var response = await Http.PutAsJsonAsync("api/users/profile", editModel); *@
-            
-@*             if (response.IsSuccessStatusCode) *@
-@*             { *@
-@*                 // Update local user object *@
-@*                 user.FirstName = editModel.FirstName; *@
-@*                 user.LastName = editModel.LastName; *@
-@*                 user.Email = editModel.Email; *@
-@*                 user.UserName = editModel.UserName; *@
-@*                 user.Birthday = DateOnly.FromDateTime(editModel.BirthdayDateTime); *@
-@*                 user.PhoneNumber = editModel.PhoneNumber; *@
-                
-@*                 // Exit edit mode *@
-@*                 isEditing = false; *@
-@*             } *@
-@*         } *@
-@*         catch (Exception) *@
-@*         { *@
-@*             // Handle error *@
-@*         } *@
-@*     } *@
+        // Simulated bookings data
+        userBookings = new List<BookingModel>
+        {
+            new() {
+                Id = "BK001",
+                EventTitle = "Summer Music Festival",
+                EventDate = DateTime.Parse("2024-06-28"),
+                EventImage = "https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg",
+                TicketCount = 2,
+                TotalAmount = "$198",
+                Status = "Confirmed"
+            },
+            new() {
+                Id = "BK002",
+                EventTitle = "Tech Conference 2024",
+                EventDate = DateTime.Parse("2024-08-05"),
+                EventImage = "https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg",
+                TicketCount = 1,
+                TotalAmount = "$149",
+                Status = "Completed"
+            }
+        };
+    }
 
-@*     private void FilterBookings(string filter) *@
-@*     { *@
-@*         bookingFilter = filter; *@
-        
-@*         switch (filter) *@
-@*         { *@
-@*             case "upcoming": *@
-@*                 filteredBookings = bookings *@
-@*                     .Where(b => !b.IsPast && !b.IsCancelled) *@
-@*                     .OrderBy(b => b.EventDate) *@
-@*                     .ToList(); *@
-@*                 break; *@
-@*             case "past": *@
-@*                 filteredBookings = bookings *@
-@*                     .Where(b => b.IsPast && !b.IsCancelled) *@
-@*                     .OrderByDescending(b => b.EventDate) *@
-@*                     .ToList(); *@
-@*                 break; *@
-@*             default: // "all" *@
-@*                 filteredBookings = bookings *@
-@*                     .OrderByDescending(b => b.EventDate) *@
-@*                     .ToList(); *@
-@*                 break; *@
-@*         } *@
-@*     } *@
+    private void HandleProfileUpdate()
+    {
+        currentUser = new UserModel
+            {
+                Name = editUser.Name,
+                Email = editUser.Email,
+                Phone = editUser.Phone,
+                Avatar = currentUser.Avatar,
+                JoinDate = currentUser.JoinDate
+            };
+        isEditing = false;
+    }
 
-@*     private void ViewBookingDetails(int bookingId) *@
-@*     { *@
-@*         NavigationManager.NavigateTo($"/booking/{bookingId}"); *@
-@*     } *@
+    private void CancelEdit()
+    {
+        editUser = new UserModel
+            {
+                Name = currentUser.Name,
+                Email = currentUser.Email,
+                Phone = currentUser.Phone
+            };
+        isEditing = false;
+    }
 
-@*     private void EditBooking(int bookingId) *@
-@*     { *@
-@*         NavigationManager.NavigateTo($"/booking/{bookingId}/edit"); *@
-@*     } *@
+    private void ChangeAvatar()
+    {
+        // Implement avatar change functionality
+    }
 
-@*     private void ConfirmCancelBooking(int bookingId) *@
-@*     { *@
-@*         bookingToCancel = bookingId; *@
-@*         showCancelConfirm = true; *@
-@*     } *@
+    private void ViewBooking(BookingModel booking)
+    {
+        NavigationManager.NavigateTo($"/bookings/{booking.Id}");
+    }
 
-@*     private void CancelConfirmation() *@
-@*     { *@
-@*         showCancelConfirm = false; *@
-@*     } *@
+    private void CancelBooking(BookingModel booking)
+    {
+        booking.Status = "Cancelled";
+    }
 
-@*     private async Task ConfirmCancel() *@
-@*     { *@
-@*         try *@
-@*         { *@
-@*             var response = await Http.DeleteAsync($"api/bookings/{bookingToCancel}"); *@
-            
-@*             if (response.IsSuccessStatusCode) *@
-@*             { *@
-@*                 // Update local booking status *@
-@*                 var booking = bookings.FirstOrDefault(b => b.Id == bookingToCancel); *@
-@*                 if (booking != null) *@
-@*                 { *@
-@*                     booking.IsCancelled = true; *@
-@*                 } *@
-                
-@*                 // Re-filter bookings *@
-@*                 FilterBookings(bookingFilter); *@
-@*             } *@
-            
-@*             showCancelConfirm = false; *@
-@*         } *@
-@*         catch (Exception) *@
-@*         { *@
-@*             // Handle error *@
-@*             showCancelConfirm = false; *@
-@*         } *@
-@*     } *@
+    private void ExploreEvents()
+    {
+        NavigationManager.NavigateTo("/events");
+    }
 
-@*     private string GetStatusClass(UserBooking booking) *@
-@*     { *@
-@*         if (booking.IsCancelled) return "cancelled"; *@
-@*         if (booking.IsPast) return "past"; *@
-@*         return "upcoming"; *@
-@*     } *@
+    private class UserModel
+    {
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string Phone { get; set; }
+        public string Avatar { get; set; }
+        public DateTime JoinDate { get; set; }
+    }
 
-@*     private string GetStatusText(UserBooking booking) *@
-@*     { *@
-@*         if (booking.IsCancelled) return "Cancelled"; *@
-@*         if (booking.IsPast) return "Past"; *@
-@*         return "Upcoming"; *@
-@*     } *@
-
-@*     public void Dispose() *@
-@*     { *@
-@*         cts.Cancel(); *@
-@*         cts.Dispose(); *@
-@*     } *@
-
-@*     public class UserEditModel *@
-@*     { *@
-@*         [Required(ErrorMessage = "First name is required")] *@
-@*         [StringLength(50, ErrorMessage = "First name is too long")] *@
-@*         public string FirstName { get; set; } *@
-        
-@*         [Required(ErrorMessage = "Last name is required")] *@
-@*         [StringLength(50, ErrorMessage = "Last name is too long")] *@
-@*         public string LastName { get; set; } *@
-        
-@*         [Required(ErrorMessage = "Email is required")] *@
-@*         [EmailAddress(ErrorMessage = "Invalid email address")] *@
-@*         public string Email { get; set; } *@
-        
-@*         [Required(ErrorMessage = "Username is required")] *@
-@*         [StringLength(30, ErrorMessage = "Username is too long")] *@
-@*         public string UserName { get; set; } *@
-        
-@*         public DateTime BirthdayDateTime { get; set; } = DateTime.Today; *@
-        
-@*         [Phone(ErrorMessage = "Invalid phone number")] *@
-@*         public string PhoneNumber { get; set; } *@
-        
-@*         public DateOnly Birthday => DateOnly.FromDateTime(BirthdayDateTime); *@
-@*     } *@
-@* } *@
+    private class BookingModel
+    {
+        public string Id { get; set; }
+        public string EventTitle { get; set; }
+        public DateTime EventDate { get; set; }
+        public string EventImage { get; set; }
+        public int TicketCount { get; set; }
+        public string TotalAmount { get; set; }
+        public string Status { get; set; }
+    }
+}

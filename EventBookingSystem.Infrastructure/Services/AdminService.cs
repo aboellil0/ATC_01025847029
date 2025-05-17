@@ -1,6 +1,8 @@
-﻿using EventBookingSystem.Core.DTOs.Bookings;
+﻿using EventBookingSystem.Core.DTOs.Auth;
+using EventBookingSystem.Core.DTOs.Bookings;
 using EventBookingSystem.Core.DTOs.Events;
 using EventBookingSystem.Core.DTOs.User;
+using EventBookingSystem.Core.Entities;
 using EventBookingSystem.Core.Interfaces.Repositories;
 using EventBookingSystem.Core.Interfaces.Services;
 using System;
@@ -26,7 +28,7 @@ namespace EventBookingSystem.Infrastructure.Services
             _bookingRepository = bookingRepository;
             _eventRepository = eventRepository;
         }
-        public async Task<DashboardOverview> getDashboardStats()
+        public async Task<DashboardOverviewModel> getDashboardStats()
         {
             var totalUsers = await userRepository.GetAllUsersAsync();
             var totalEvents = await _eventRepository.ListAllAsync();
@@ -34,7 +36,7 @@ namespace EventBookingSystem.Infrastructure.Services
             var totalRevenue = totalBookings.Sum(b => b.Event.Price);
             var recentBookings = totalBookings.OrderByDescending(b => b.BookingDate).Take(5).ToList();
             var recentEvents = totalEvents.OrderByDescending(b => b.EventDate).Take(5).ToList();
-            return new DashboardOverview
+            return new DashboardOverviewModel
             {
                 totalUsers = totalUsers.Count(),
                 totalEvents = totalEvents.Count(),
@@ -101,8 +103,72 @@ namespace EventBookingSystem.Infrastructure.Services
             return bookingDtos;
         }
 
-    }
+        public async Task<BookingDto> GetBookingById(Guid id)
+        {
+            var booking = await _bookingRepository.GetBookingByIdAsync(id);
+            if (booking == null)
+            {
+                return null;
+            }
+            var user = await userRepository.GetUserByIdAsync(booking.UserId);
+            var eventEntity = await _eventRepository.GetEventByIdAsync(booking.EventId);
+            var bookingDto = new BookingDto
+            {
+                Id = booking.Id,
+                UserId = booking.UserId,
+                EventId = booking.EventId,
+                BookingDate = booking.BookingDate,
+                Event = new simplieEventInformations
+                {
+                    name = eventEntity.Name,
+                    vanue = eventEntity.Venue,
+                    startDate = eventEntity.EventDate
+                },
+                User = new simpleUserInformations
+                {
+                    email = user.Email,
+                    name = user.FirstName + " " + user.LastName,
+                    userName = user.UserName
+                }
+            };
+            return bookingDto;
+        }
 
-    
-    
+        public async Task<UserDto> CreateAdminAsync(RegisterReq userDto)
+        {
+            var user = ApplicationUser.Create(
+                userDto.UserName,
+                userDto.Email,
+                userDto.FirstName,
+                userDto.LastName,
+                userDto.PhoneNumber,
+                userDto.Birthaday
+            );
+
+            // Check if the email or username already exists  
+            if (await userRepository.CheckEmailExistsAsync(userDto.Email))
+            {
+                throw new Exception("Email already exists");
+            }
+            if (await userRepository.CheckUsernameExistsAsync(userDto.UserName))
+            {
+                throw new Exception("Username already exists");
+            }
+
+            // Create the user  
+            var createdUser = await userRepository.AddAdminAsync(user, userDto.Password);
+            return new UserDto
+            {
+                UserName = createdUser.UserName,
+                Email = createdUser.Email,
+                FirstName = createdUser.FirstName,
+                LastName = createdUser.LastName,
+                PhoneNumber = createdUser.PhoneNumber,
+                DateOfBirth = createdUser.DateOfBirth,
+                CreatedAt = createdUser.CreatedAt,
+                IsEmailVerified = createdUser.IsEmailVerified,
+                IsPhoneVerified = createdUser.IsPhoneVerified
+            };
+        }
+    }
 }

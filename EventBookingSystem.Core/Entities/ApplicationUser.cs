@@ -20,7 +20,7 @@ namespace EventBookingSystem.Core.Entities
         protected ApplicationUser() { } // عشان ال EFCore
 
 
-        public static ApplicationUser Create(string username,string email, string fName, string lName, DateOnly dateBirhday)
+        public static ApplicationUser Create(string username,string email, string fName, string lName, string phoneNumber, DateOnly dateBirhday)
         {
             return new ApplicationUser()
             {

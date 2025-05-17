@@ -2,13 +2,14 @@
 using EventBookingSystem.Core.Entities;
 using EventBookingSystem.Core.Interfaces.Repositories;
 using EventBookingSystem.Core.Interfaces.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
+
 namespace EventBookingSystem.Infrastructure.Services
 {
     public class AuthService : IAuthService
@@ -39,11 +40,9 @@ namespace EventBookingSystem.Infrastructure.Services
                     return new AuthResponse { Error = "User Is already regiterd with same username", Message = request.UserName, Success = false };
                 }
 
-                var user = ApplicationUser.Create(request.UserName, request.Email, request.FirstName, request.LastName, request.Birthaday);
-                await _userRepository.AddUserAsync(user,request.Password);
-
-
-                return await GenerateAuthResponseAsync(user);
+                var user = ApplicationUser.Create(request.UserName, request.Email, request.FirstName,request.LastName, request.PhoneNumber, request.Birthaday);
+                var userMangerCretion =  await _userRepository.AddUserAsync(user, request.Password);
+                return await GenerateAuthResponseAsync(userMangerCretion);
             }
             catch (Exception ex)
             {
@@ -107,7 +106,7 @@ namespace EventBookingSystem.Infrastructure.Services
                     return new AuthResponse { Success = false, Error = "User not found" };
                 }
                 var isValid = await _tokenService.ValidateRefreshTokenAsync(Guid.Parse(userId), request.RefreshToken);
-                if (isValid)
+                if (!isValid)
                 {
                     return new AuthResponse { Success = false, Error = "Invalid refresh token" };
                 }
@@ -122,16 +121,26 @@ namespace EventBookingSystem.Infrastructure.Services
 
         private async Task<AuthResponse> GenerateAuthResponseAsync(ApplicationUser user)
         {
-            var accessToken = await _tokenService.GenerateAccessTokenAsync(user);
-            var refreshToken = await _tokenService.GenerateRefreshTokenAsync(user.Id);
+            if (user != null)
+            {
+                var accessToken = await _tokenService.GenerateAccessTokenAsync(user);
+                var refreshToken = await _tokenService.GenerateRefreshTokenAsync(user.Id);
 
+                return new AuthResponse
+                {
+                    Success = true,
+                    Token = accessToken,
+                    RefreshToken = refreshToken,
+                    // Replace the problematic line with the following:
+                    AccessTokenExpiration = DateTime.Now.AddMinutes(
+                    int.TryParse(_configuration["Jwt:AccessTokenExpirationMinutes"], out var expirationMinutes) ? expirationMinutes : 15),
+
+                };
+            }
             return new AuthResponse
             {
-                Success = true,
-                Token = accessToken,
-                RefreshToken = refreshToken,
-                AccessTokenExpiration = DateTime.Now.AddMinutes(
-                    _configuration.GetValue<int>("Jwt:AccessTokenExpirationMinutes", 15)),
+                Success = false,
+                Error = "User not found"
             };
         }
 
@@ -156,4 +165,3 @@ namespace EventBookingSystem.Infrastructure.Services
 
     }
 }
-
